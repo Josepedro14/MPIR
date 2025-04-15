@@ -257,12 +257,94 @@ std::vector<int> build_MatrixM_PlusfgAndProb (Eigen::MatrixXd &matrix_M, int K, 
 }
 
 
-void buildSparseVectorGAndVn(std::vector<int> pairIJ, int D, int K, int q, std::mt19937 shuffle_random)
+std::vector<int> buildCircularVector (std::vector<int> &gDVec, int D, int lastVecValueInit, int &new_lastVecValue)
 {
-    int i = pairIJ[0]; 
+    std::vector<int> gDVecAux(D, 0);
+
+    for(int i = 0; i < D; i++)
+    {
+        if(gDVec[i] > 0)
+        {
+            gDVecAux[i] = lastVecValueInit;
+            lastVecValueInit = gDVec[i];
+        }
+
+        if(gDVecAux[i] > 0)
+        {
+            new_lastVecValue = gDVecAux[i];
+        }
+    }
+
+
+    return gDVecAux;
+}
+
+
+void fillGMatrixInRecursive (Eigen::MatrixXd &Gmatrix, std::vector<int> &gDvec, int D, int lastVecValue, int line)
+{
+
+    if(line >= D)
+    {
+        return;
+    }
+
+    if(line == 0)
+    {
+        for(int col = 0; col < D; col++)
+        {
+            Gmatrix(line,col) = gDvec[col];
+        }
+        fillGMatrixInRecursive(Gmatrix,gDvec,D,lastVecValue,line + 1);
+    }
+
+    else 
+    {
+        int new_lastVecValue;
+        std::vector<int> gDvecAux = buildCircularVector(gDvec,D,lastVecValue,new_lastVecValue);
+        
+        for(int col = 0; col < D; col++)
+        {
+            Gmatrix(line,col) = gDvecAux[col];
+        }
+
+        fillGMatrixInRecursive(Gmatrix,gDvecAux,D,new_lastVecValue,line + 1);
+    }
+
+}
+
+
+void constructNVectors (int D, int K, int q, int i_index, std::mt19937 shuffle_random, std::vector<Message> &messages,std::vector<int> h,Eigen::MatrixXd Gmatrix, int L, int N, int symbols_subpacket)
+{
+    // Se i = 0 então v1 é preenchido apenas com zeros, caso contrário é dado por: Y1 = h * [Xu1,1,...,XuK-D,1]T
+
+    std::vector<std::vector<int>> n_vectors(N, std::vector<int>(K * L));
+    std::vector<int> interferenceMessages((K-D) * L);
+    std::vector<int> demandMessages ((K-D) * L);
+
+    if(i_index == 0)
+    {
+        for(int i = 0; i < K*L; i++)
+        {
+            n_vectors[0][i] = 0;
+        }
+    }
+
+    else 
+    {
+
+    }
+}
+
+
+void buildSparseVectorGAndVn(std::vector<int> pairIJ, int D, int K, int q, std::mt19937 shuffle_random, std::vector<Message> &messages, int L, int N, int symbols_subpacket)
+{
+    int i_index = pairIJ[0], j_index = pairIJ[1]; 
     std::vector<int> h(K - D, 0); 
     std::vector<int> h_index(K - D); 
-    int nums_ToFill = i;
+    int nums_ToFilli = i_index, nums_ToFillj = j_index, lastVecValue;
+
+    //std::cout << "\nMostrar valor indice i: " <<  i_index <<  '\n';
+    //std::cout << "\nMostrar valor indice j: " <<  j_index <<  '\n';
     
     for (int i = 0; i < (K - D); i++)
     {
@@ -271,19 +353,82 @@ void buildSparseVectorGAndVn(std::vector<int> pairIJ, int D, int K, int q, std::
 
     std::shuffle(h_index.begin(), h_index.end(), shuffle_random);
     
-    for (int j = 0; j < nums_ToFill; j++)
+    for (int j = 0; j < nums_ToFilli; j++)
     {
-        int num_finite_field = rand() % q; 
-        h[h_index[j]] = num_finite_field; 
+        int num_finite_field = rand() % q;
+        int num = num_finite_field != 0 ? num_finite_field : num_finite_field + 1; 
+        h[h_index[j]] = num;
     }
+
+   /*
+    std::cout << "\nMostrar h sparse vector " << '\n';
 
     for(int i = 0; i < (K-D); i++)
     {
         std::cout << h[i] << ' ';
     }
 
-}
+    std::cout << '\n';
+    
+    */
 
+    // Construir uma matriz j-regular (DxD) sobre Fq com duas condições:
+    //      1. O vetor g1 possui exatamente j entradas não nulas em posições aleatórias
+    //      2. Para cada 2 <= m <= D as posições das entradas não nulas no vetor gm são uma rotação circular das posições das entradas não nulas do vetor gm-1
+    // Numa matriz regular ela tem de ser quadrada e o determinante diferente de 0
+
+    Eigen::MatrixXd Gmatrix(D,D);
+    std::vector<int> gD_index(D);
+    std::vector<int> gDvec (D,0);
+    int lastIndex = 0;
+
+    for(int i = 0; i < D; i++)
+    {
+        gD_index[i] = i;
+    }
+
+    std::shuffle(gD_index.begin(),gD_index.end(), shuffle_random);
+
+    for(int k = 0; k < nums_ToFillj; k++)
+    {
+        int num_finite_field = rand() % q;
+        int num = num_finite_field != 0 ? num_finite_field : num_finite_field + 1;
+        gDvec[gD_index[k]] = num;
+        if(gD_index[k] >= lastIndex)
+        {
+            lastVecValue = num;
+        }
+        lastIndex = gD_index[k];
+    }
+    
+    /*
+    std::cout << "\nMostrar g1 vector " << '\n';
+
+    for(int i = 0; i < D; i++)
+    {
+        std::cout << gDvec[i] << ' ';
+    }
+
+    std::cout << '\n';
+
+    //Exemplo maior Gmatrix:
+
+    std::vector<int> vecteste = {1,0,4,5,0};
+    Eigen::MatrixXd Gmatrixteste(5,5);
+
+    fillGMatrixInRecursive(Gmatrixteste,vecteste,5,lastVecValue,0);
+
+    show_MatrixM(Gmatrixteste,5,5);
+    */
+
+    fillGMatrixInRecursive(Gmatrix,gDvec,D,lastVecValue,0);
+
+    //show_MatrixM(Gmatrix,D,D);
+    //std::cout << "O determinante da Gmatrix é: " << Gmatrix.determinant() << '\n'; 
+
+    constructNVectors(D,K,q,i_index,shuffle_random, messages,h,Gmatrix,L,N,symbols_subpacket);
+
+}
 
 
 int main ()
@@ -312,7 +457,7 @@ int main ()
     buildShuffle_Subpackets(messages,K,L,symbols_subpacket,q,shuffle_random);
     pairIJ = build_MatrixM_PlusfgAndProb(matrix_M,K,D,L);
 
-    buildSparseVectorGAndVn(pairIJ,D,K,q,shuffle_random);
+    buildSparseVectorGAndVn(pairIJ,D,K,q,shuffle_random,messages,L,N,symbols_subpacket);
 
     return 0; 
 }
