@@ -315,11 +315,12 @@ void fillGMatrixInRecursive (Eigen::MatrixXd &Gmatrix, std::vector<int> &gDvec, 
 
 void constructNVectors (int D, int K, int q, int i_index, std::mt19937 shuffle_random, std::vector<Message> &messages,std::vector<int> h,Eigen::MatrixXd Gmatrix, int L, int N, int symbols_subpacket)
 {
-    // Se i = 0 então v1 é preenchido apenas com zeros, caso contrário é dado por: Y1 = h * [Xu1,1,...,XuK-D,1]T
+    // Se i = 0 então v1 é preenchido apenas com zeros, caso contrário é dado por: Y1 = h * [Xu1,1,...,XuK-D,1]T onde u1,...,uK-D são os indices das K-D mensagens de interferência numa ordem crescente ou descendente mas fixa
 
-    std::vector<std::vector<int>> n_vectors(N, std::vector<int>(K * L));
-    std::vector<int> interferenceMessages((K-D) * L);
-    std::vector<int> demandMessages ((K-D) * L);
+    std::vector<std::vector<int>> n_vectors(N, std::vector<int>(K * L,0));
+    std::vector<Eigen::VectorXi> demand_messages;
+    std::vector<Eigen::VectorXi> interference_messages;
+    Eigen::VectorXi Y1 = Eigen::VectorXi::Zero(symbols_subpacket);
 
     if(i_index == 0)
     {
@@ -332,6 +333,97 @@ void constructNVectors (int D, int K, int q, int i_index, std::mt19937 shuffle_r
     else 
     {
 
+        //show_MessagesSubpackets(messages,K,L,symbols_subpacket);
+        
+        for(int i = 0; i < K; i++)
+        {
+            for(int j = 0; j < L; j++)
+            {
+                Eigen::VectorXi vec_aux(symbols_subpacket); 
+
+                for(int k = 0; k < symbols_subpacket; k++)
+                {
+                    vec_aux(k) = messages[i].subpackets[j].numsR_finite_field[k];
+                }
+
+                if (i < (K - D)) {
+
+                    demand_messages.push_back(vec_aux);
+                } 
+
+                else if (j == 0 && i >= (K - D)) {
+
+                    interference_messages.push_back(vec_aux);
+                }
+
+            }
+        }
+
+        for(int i = 0; i < (K-D); i++)
+        {
+            Y1 += h[i] * interference_messages[i];
+        }
+
+        int index = 0;
+        for(int k = (K-D); k < K; k++)
+        {
+            n_vectors[0][k * L] = Y1(index);
+            index++;
+        }
+
+        /*
+        std::cout << "\nPrint h: " << '\n';
+        for(int j = 0; j < (K-D); j++)
+        {
+            std::cout << h[j] << ' ';
+        }
+
+        std::cout << "\nPrint Y1: " << '\n';
+        for(int j = 0; j < (K-D); j++)
+        {
+            std::cout << Y1(j) << ' ';
+        }
+
+        std::cout << '\n';
+        */
+    }
+
+    // Para 1 <= l <= L e 1 <= m <= D o vetor v(l-1)*D+m+1 := Y1 + gm * [Xw,l,...,XwD,l]T, onde w1,...,wD são os índices das mensagens requisitadas pelo utilizador
+    
+    std::vector <Eigen::VectorXi> yVectors;
+
+    for(int l = 1; l < L; l++)
+    {
+        for(int m = 1; m < D; m++)
+        {
+            Eigen::VectorXi yVecX(D);
+            Eigen::VectorXi yVecAux = Eigen::VectorXi::Zero(D);
+            Eigen::VectorXd gmAux(D);
+            std::vector <Eigen::VectorXi> demandMessagesAux;
+
+            for(int col = 0; col < D; col ++)
+            {
+                gmAux(col) = Gmatrix(m-1,col);
+            }
+
+            for(size_t i = 0; i < demand_messages.size(); i++)
+            {
+                size_t index = i * L + (l-1);
+
+                if(index < demand_messages.size())
+                {
+                    demandMessagesAux.push_back(demand_messages[index]);
+                }
+            }
+
+            for(size_t j = 0; j < demandMessagesAux.size(); j++)
+            {
+                yVecAux += gmAux * demandMessagesAux[j]; 
+            }
+
+            yVecX = Y1 + yVecAux;
+            yVectors.push_back(yVecX);
+        }
     }
 }
 
@@ -402,7 +494,7 @@ void buildSparseVectorGAndVn(std::vector<int> pairIJ, int D, int K, int q, std::
     }
     
     /*
-    std::cout << "\nMostrar g1 vector " << '\n';
+    std::cout << "\nMostrar vector g1 " << '\n';
 
     for(int i = 0; i < D; i++)
     {
