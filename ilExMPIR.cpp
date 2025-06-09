@@ -26,7 +26,6 @@ struct Message
     std::vector <Subpacket> subpackets;
 };
 
-
 /*
 Definição de uma função para mostrar as mensagens e subpacotes pela respetiva hierarquia
     Basicamente percorremos as mensagens todas em cada mensagem percorremos todos os subpacotes e em cada subpacote mostramos todos os seus elementos
@@ -51,6 +50,7 @@ void show_MessagesSubpackets (std::vector <Message> &messages, int K, int L, int
         std::cout << '\n';
     }
 }
+
 
 
 // Função para mostrar uma matriz
@@ -82,6 +82,18 @@ void show_Vector (Eigen::VectorXd &vec, int size)
 }
 
 
+// Função para mostrar um vetor
+void show_Vectorxi (Eigen::VectorXi &vec, int size)
+{
+    std::cout << "Vector: " << '\n';
+
+    for(int i = 0; i < size; i++)
+    {
+        std::cout << vec(i) << " " << '\n';
+    }
+}
+
+
 // Função para mostrar vector std::vector <int>
 void show_VectorSTD (std::vector <int> &vec, int size)
 {
@@ -95,44 +107,17 @@ void show_VectorSTD (std::vector <int> &vec, int size)
     std::cout << '\n';
 }
 
-
-/*
-Função para preencher o atributo mensagens com elementos; 
-    Mais concretamente criamos um subpacote auxiliar Subpacket new_subpacket e preenchemo-lo
-    com valores aleatórios gerados a partir de um finite field de ordem q, com o subpacket 
-    preenchido podemos adicioná-lo aos subpacotes de uma determinada mensagem, por fim basta-nos
-    agora já com todos os subpacotes devidamente preenchidos e colocados na mensagem baralhá-los,
-    para isso usamos o método shuffle em que para uma determinada mensagem passamos-lhe o ínico dos 
-    subpackets o fim e o shuffle_random para ele os embaralhar.
-*/
-void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int symbols_subpacket, int q, std::mt19937 shuffle_random)
+// Função para mostrar subpackets das demand messages e interference messages
+void show_SubpacketsVectorXi (std::vector<Eigen::VectorXi> messages, size_t size, int symbols_subpacket)
 {
-    // Iterar sobre as mensagens
-    for(int i = 0; i < K; i++)
-    {
-        // Iterar sobre os subpackets da mensagem
-        for(int j = 0; j < L; j++)
+     for(size_t i = 0; i < messages.size(); i++)
         {
-            // Criar um subpacket para auxiliar o processo
-            Subpacket new_subpacket;
-
-            // Gerar números aleatórios do finite field de ordem q e adicioná-los ao subpacket
-            for(int k = 0; k < symbols_subpacket; k++)
+            std::cout << "\nPrint subpacotes das mensagens: " << '\n';
+            for(int j = 0; j < symbols_subpacket; j++)
             {
-                int finite_field_num = rand() % q;
-                new_subpacket.numsR_finite_field.push_back(finite_field_num);
+                std::cout << messages[i](j) << " ";
             }
-
-            // Adicionar o subpacket ao conjunto de subpackets de uma mensagem
-            messages[i].subpackets.push_back(new_subpacket);
         }
-
-        // Dar shuffle a um conjunto de subpackets de uma determinada mensagem
-        std::shuffle(messages[i].subpackets.begin(),messages[i].subpackets.end(),shuffle_random);
-    }
-
-    // Chamar função de print para as mensagens e respetivos subpacotes
-    //show_MessagesSubpackets(messages,K,L,symbols_subpacket);
 }
 
 
@@ -205,10 +190,10 @@ std::vector <int> chooseAleatoryPair (Eigen::MatrixXd &matrixProb, int K, int D,
     double random_num = (double) rand() / RAND_MAX;
     double sum = 0.0;
 
-    // std::cout << "Probabilidade: " << random_num << '\n';
+     std::cout << "\nProbabilidade do número gerado: " << random_num << '\n';
 
     // Percorremos a matriz de probabilidades 
-    for(int i = 0; i < (K-D); i++)
+    for(int i = 0; i < (K-D) + 1; i++)
     {
         for(int j = 0; j < D; j++)
         {
@@ -220,12 +205,124 @@ std::vector <int> chooseAleatoryPair (Eigen::MatrixXd &matrixProb, int K, int D,
                 // Atribuímos i,j consoante o valor de sum no momento
                 pairChosenValues.push_back(i);
                 pairChosenValues.push_back(j+1);
+                return pairChosenValues;
             }
         }
     }
 
     return pairChosenValues;
 }
+
+
+
+/*
+Função que recebe um vetor gD-1 da Matriz G  calcular o vetor gD a partir do anterior
+*/
+Eigen::VectorXd buildCircularVector (Eigen::VectorXd &gDVec, int D)
+{
+    // Vetor auxiliar que vai conter a rotação das posições
+    Eigen::VectorXd gDVecAux = Eigen::VectorXd::Zero(D);
+
+   /*
+   Exemplo:
+   Imaginemos que temos g1: 0 1 0 2 então o que aqui estaremos a fazer é: fazer uma rotação de cada elemento uma posição para a direita ficando: 
+   g2: 2 0 1 0 
+   */
+
+    for(int i = 0; i < D; i++)
+    {
+        int position = i + 1;
+
+        if(position > D-1)
+        {
+            position = 0;
+        }
+
+        gDVecAux(position) = gDVec(i);
+    }
+
+    return gDVecAux;
+}
+
+
+
+void fillGMatrixInRecursive (Eigen::MatrixXd &Gmatrix, Eigen::VectorXd &g1Vec, int D, int line)
+{
+    // Se a linha atual for maior que o tamanho da Matriz então retorna a Matriz obtida
+    if(line >= D)
+    {
+        return;
+    }
+
+    // Se a linha for a primeira vamos usar o vetor g1 com j entradas não nulas que geramos anteriormente para preencher na primeira linha da Matriz
+    if(line == 0)
+    {
+        for(int col = 0; col < D; col++)
+        {
+            Gmatrix(line,col) = g1Vec(col);
+        }
+
+        // Preencher o resto da Matriz recursivamente com os vetores circulares (gD) gerados a partir do anterior (gD-1)
+        fillGMatrixInRecursive(Gmatrix, g1Vec, D, line + 1);
+    }
+
+    // Se não for nenhum dos casos acima então vamos preencher o resto da matriz com o auxílio da função buildCircularVector descrita acima
+    else 
+    {   
+        // Vetor circular gD obtido através do anterior gD-1
+        Eigen::VectorXd gDvecAux = buildCircularVector(g1Vec, D);
+
+        // Preencher a próxima linha da matriz (line) com os valores do vetor gerado 
+        for(int col = 0; col < D; col++)
+        {
+            Gmatrix(line,col) = gDvecAux(col);
+        }
+
+        // Preencher o resto da Matriz recursivamente ou devolvê-la preenchida
+        fillGMatrixInRecursive(Gmatrix, gDvecAux, D, line + 1);
+    }
+}
+
+
+/*
+Função para preencher o atributo mensagens com elementos; 
+    Mais concretamente criamos um subpacote auxiliar Subpacket new_subpacket e preenchemo-lo
+    com valores aleatórios gerados a partir de um finite field de ordem q, com o subpacket 
+    preenchido podemos adicioná-lo aos subpacotes de uma determinada mensagem, por fim basta-nos
+    agora já com todos os subpacotes devidamente preenchidos e colocados na mensagem baralhá-los,
+    para isso usamos o método shuffle em que para uma determinada mensagem passamos-lhe o ínico dos 
+    subpackets o fim e o shuffle_random para ele os embaralhar.
+*/
+void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int symbols_subpacket, int q, std::mt19937 shuffle_random)
+{
+    // Iterar sobre as mensagens
+    for(int i = 0; i < K; i++)
+    {
+        // Iterar sobre os subpackets da mensagem
+        for(int j = 0; j < L; j++)
+        {
+            // Criar um subpacket para auxiliar o processo
+            Subpacket new_subpacket;
+
+            // Gerar números aleatórios do finite field de ordem q e adicioná-los ao subpacket
+            for(int k = 0; k < symbols_subpacket; k++)
+            {
+                int finite_field_num = rand() % q;
+                new_subpacket.numsR_finite_field.push_back(finite_field_num);
+            }
+
+            // Adicionar o subpacket ao conjunto de subpackets de uma mensagem
+            messages[i].subpackets.push_back(new_subpacket);
+        }
+
+        // Dar shuffle a um conjunto de subpackets de uma determinada mensagem
+        std::shuffle(messages[i].subpackets.begin(),messages[i].subpackets.end(),shuffle_random);
+    }
+
+    // Chamar função de print para as mensagens e respetivos subpacotes
+    show_MessagesSubpackets(messages,K,L,symbols_subpacket);
+}
+
 
 
 /*
@@ -235,7 +332,7 @@ Função para calcular a Matriz M da página 2 do documento elemento (1)
 */
 std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int K, int D, int L)
 {
-    // Define uma matriz identidade DxD para auxilidar no cálculo das funções f e g
+     // Define uma matriz identidade DxD para auxilidar no cálculo das funções f e g
     Eigen::MatrixXd identityMatrix = Eigen::MatrixXd::Identity(D,D);
     // Definir um vetor de tamanho D quer irá ser preenchido por 1's e também será usado no cálculo das funções f e g
     Eigen::VectorXd colVec1s(D);
@@ -269,9 +366,9 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
         colVec1s(line) = 1.0;
     }
 
-    //show_Matrix(matrix_M,D,D);
-    //show_Vector(colVec1s,D);
-
+    std::cout << "\nPrint Matriz M: " << '\n';
+    show_Matrix(matrix_M,D,D);
+    show_Vector(colVec1s,D);
 
     // Agora iremos calcular as funções fT e gT definidas no documento na página 2, elementos (2) e (3) respetivamente
     // M ^ (K-D)
@@ -284,6 +381,11 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
     Eigen::MatrixXd matrixKminusDWthI = multiplyMatrixNTimes(matrixMPlusI, (K-D), D);
     // gT = 1^T * (M+I) ^(K-D)
     Eigen::VectorXd gT = colVec1s.transpose() * matrixKminusDWthI;
+
+    std::cout << "\nPrint fT vector: " << '\n';
+    show_Vector(fT,D);
+    std::cout << "\nPrint gT vector: " << '\n';
+    show_Vector(gT,D);
 
     // Aqui vamos tentar descobrir qual o valor do índice j* este será o índice j pertencente a [D] que maximiza fj/gj calculados anteriormente.
     int indexJ = -1;
@@ -299,6 +401,8 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
             indexJ = i;
         }
     }
+
+    std::cout << "\nPrint index j*: " << indexJ << " e o maxValfDIVg para esse j* é: " << maxValfDIVg << '\n';
 
     // Para as probabilidades e possíveis pares (i,j) temos -> 
     // Neste exemplo os conjuntos possíveis seriam: (0,1);(0,2);(1,1);(1,2);(2,1);(2,2)
@@ -323,8 +427,15 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
         matrixProb((K-D),i) = probabilitiesPjD(i);
     }
 
+    std::cout << "\nMostrar probabilidades PK-D,i: " << '\n';
+    show_Vector(probabilitiesPjD,D);
+
+    std::cout << "\nMostrar Matriz Probabilidades pós PK-D,i: " << '\n';
+    show_Matrix(matrixProb,(K-D) + 1, D);
+
+
     // Probabilidades Pi,D onde 0 <= i <= K-D-1
-    // Para cada i calculamos a probabilidade de Pi,n onde 1 <= n <=D
+    // Para cada i calculamos a probabilidade de Pi,n onde 1 <= n <= D
     //  Pi,n = Ck-n,i * M^k-n-i * Pk-D,n
     for(int i = 0; i <= (K-D) - 1; i++)
     {   
@@ -338,94 +449,24 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
         {
             matrixProb(i,j) = probabilitiesPiD(j);
         }
+
+            std::cout << "\nMostrar probabilidades Pi,D na iteração i = " << i << '\n';
+            show_Vector(probabilitiesPiD,D);
+
+            std::cout << "\nMostrar Matriz Probabilidades fim na iteração i = " << i << '\n';
+            show_Matrix(matrixProb,(K-D) + 1, D);
     }
 
-    // show_Matrix(matrixProb,(K-D) + 1, D);
-    // std::cout << "\nSoma das probabilidades de todos os pares: " << matrixProb.sum() << '\n'; 
+     std::cout << "\nSoma das probabilidades de todos os pares: " << matrixProb.sum() << '\n'; 
 
     // Define vetor que conterá o par obtido pelas probabilidades e está disposto pela ordem i,j
     std::vector <int> pairChosenValues;
     
     pairChosenValues = chooseAleatoryPair(matrixProb, K, D, pairChosenValues);
 
-    return pairChosenValues;    
+    return pairChosenValues;  
 }
 
-/*
-Função que recebe um vetor gD-1 da Matriz G  calcular o vetor gD e recebe duas variáveis que representam respetivamente o último valor maior que 0 do vetor g e o que vai armazenar o último novo valor
-*/
-std::vector <int> buildCircularVector (std::vector <int> &gDVec, int D, int lastVecValueInit, int &new_lastVecValue)
-{
-    // Vetor auxiliar que vai conter a rotação das posições
-    std::vector <int> gDVecAux(D,0);
-
-    // Percorremos o vetor fornecido e nas posições em que o valor atual for maior que 0 o que fazemos é no novo vetor na mesma posição 
-    // que o anterior colocamos o último valor guardado que está em lastVecValueInit e atualizamos o último valor e assim sucessivamente  
-    /*
-        Imaginando que temos o seguinte vetor g1: 0 2 0 0 3 0 7 0
-        O lastVecValueInit tem o valor 7, o que está a acontecer é: 
-        Na 1º posição o valor é 0 não fazemos nada
-        Na 2º posição o valor é > 0 (2) então o que fazemos é no novo vetor na mesma posição colocar o lastVecValueInit (7), e guardar no lastVecValueInit guardar o valor atual de gDVec(2),
-        fazemos isto até ao fim do vetor e é suposto obtermos o seguinte vetor circular g2 através do anterior.
-        g2: 0 7 0 0 2 0 3 0
-        Para além disso guardamos o último valor do novo vetor (g2) na variável new_lastVecValue neste caso -> 3, para utlizarmos na próxima iteração recursiva da função fillGMatrixInRecursive no lugar de lastVecValue
-    */
-    for(int i = 0; i < D; i++)
-    {
-        if(gDVec[i] > 0)
-        {
-            gDVecAux[i] = lastVecValueInit;
-            lastVecValueInit = gDVec[i];
-        }
-
-        if(gDVecAux[i] > 0)
-        {
-            new_lastVecValue = gDVecAux[i];
-        }
-    }
-
-    return gDVecAux;
-}
-
-
-void fillGMatrixInRecursive (Eigen::MatrixXd &Gmatrix, std::vector <int> &g1Vec, int D, int lastVecValue, int line)
-{
-    // Se a linha atual for maior que o tamanho da Matriz então retorna a Matriz obtida
-    if(line >= D)
-    {
-        return;
-    }
-
-    // Se a linha for a primeira vamos usar o vetor g1 com j entradas não nulas que geramos anteriormente para preencher na primeira linha da Matriz
-    if(line == 0)
-    {
-        for(int col = 0; col < D; col++)
-        {
-            Gmatrix(line,col) = g1Vec[col];
-        }
-
-        // Preencher o resto da Matriz recursivamente com os vetores circulares (gD) gerados a partir do anterior (gD-1)
-        fillGMatrixInRecursive(Gmatrix, g1Vec, D, lastVecValue, line + 1);
-    }
-
-    // Se não for nenhum dos casos acima então vamos preencher o resto da matriz com o auxílio da função buildCircularVector descrita acima
-    else 
-    {   
-        // Definimos uma variável que vai possuir o novo último valor (> 0) do vetor
-        int new_lastVecValue;
-        // Vetor circular gD obtido através do anterior gD-1
-        std::vector <int> gDvecAux = buildCircularVector(g1Vec, D, lastVecValue, new_lastVecValue);
-
-        // Preencher a próxima linha da matriz (line) com os valores do vetor gerado 
-        for(int col = 0; col < D; col++)
-        {
-            Gmatrix(line,col) = gDvecAux[col];
-        }
-
-        // Preencher o resto da Matriz recursivamente ou devolvê-la preenchida
-        fillGMatrixInRecursive(Gmatrix, gDvecAux, D, new_lastVecValue, line + 1);
-    }
-}
 
 
 /*
@@ -436,24 +477,19 @@ Função para construir N (número de servers) vetores de tamanho K * L com valo
     são os índices das K-D mensagens de interferência numa ordem crescente ou decrescente mas fixa.
     - Para cada 1 <= l <= L e 1 <= m <= D o vetor v(l-1)*D+m+1 é o coeficente correspondente à combinação linear Y(l-1)*D+m+1 definida como:
     Y(l-1)*D+m+1 := Y1 + gm * [Xw,l,...XwD,l] ^T onde gm é um vetor da Gmatrix calculada anteriormente e w1,...,wD são os índices das D mensagens requeridas, numa ordem crescente ou decrescente mas fixa.
+    Imaginemos que temos 4 mensagens a,b,c,d então pelo exemplo ilustrativo do documento -> a,b são mensagens requeridas e c,d são mensagens de interferência
 */
-void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,std::vector<int> h,Eigen::MatrixXd Gmatrix)
+void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix)
 {
-    
+
     std::vector <Eigen::VectorXi> n_vectors (N, Eigen::VectorXi (K * L));
     std::vector<Eigen::VectorXi> interference_messages;
     std::vector<Eigen::VectorXi> demand_messages;
     Eigen::VectorXi Y1 = Eigen::VectorXi::Zero(symbols_subpacket);
 
-    // Variável auxiliar com o valor de h sparse vector utilizada para facilitar nas operações
-    Eigen::VectorXi hvec(K-D);
-    // Copiar o valor de h sparse vector para a nova variável
-    for(int i = 0; i < K-D; i++)
-    {
-        hvec(i) = h[i];
-    }
+    Eigen::VectorXi h_int = h.cast<int> ();
 
-   // Se i = 0 então v1 é preenchido apenas com zeros, caso contrário é dado por: Y1 = h * [Xu1,1,...,XuK-D,1] ^T
+    // Se i = 0 então v1 é preenchido apenas com zeros, caso contrário é dado por: Y1 = h * [Xu1,1,...,XuK-D,1] ^T
     if(i_index == 0)
     {
         for(int i = 0; i < K*L; i++)
@@ -463,9 +499,8 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
     }
 
     else 
-    {   
-        // Construir um vetor de Eigen::VectorXi para as interference messages e para as demand messages cada uma vai 
-        // conter os subpacotes correspondetes ao tipo de mensagem
+    {
+        // Construir um vetor de Eigen::VectorXi para as interference messages e para as demand messages cada um vai  conter os subpacotes correspondetes ao tipo de mensagem
         for(int i = 0; i < K; i++)
         {
             for(int j = 0; j < L; j++)
@@ -478,28 +513,41 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
                 }
 
                 // Armazenar nas interference messages o 1º subpacote de cada mensagem de interferência 
-                if(i >= D && j == 0)
+                if(i >= K-D && j == 0)
                 {
                     interference_messages.push_back(vecAux);
                 }
 
                 // Armazenar em demand messages os subpacotes de cada mensagem requerida
-                else 
+                else if(i < D)
                 {
                     demand_messages.push_back(vecAux);
                 }
             }
         }
+        
+        std::cout << "\nPrint interference messages (subpacket 1) messages (K-D...K): " << '\n';
+        show_SubpacketsVectorXi(interference_messages,interference_messages.size(),symbols_subpacket);
+        std::cout << '\n';
+        std::cout << "\nPrint demand messages (subpacket 0...D) messages (0...D): " << '\n';
+        show_SubpacketsVectorXi(demand_messages,demand_messages.size(),symbols_subpacket);
+        std::cout << '\n';
 
         // Calcular o vetor Y1 que vai servir para esconder as inteções do utilizador uma vez que é construído com os elementos 
         // das mensagens que não lhe interessam (mensagens de interferência)
         for (int k = 0; k < K-D; k++)
         {
-            Y1 += hvec(k) * interference_messages[k]; 
+            Y1 += h_int(k) * interference_messages[k]; 
         }
-        
+
+        std::cout << "\nPrint Y1: " << '\n';
+        show_Vectorxi(Y1,symbols_subpacket);
     }
-}   
+
+}
+
+
+
 
 /*
 Função para dado um determinado par, criar um i-sparse vector h de tamanho K-D com valores do finite field de ordem q,
@@ -512,23 +560,26 @@ Regras da matriz G são as seguintes:
 */
 void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int q, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random,std::vector<Message> &messages)
 {
-    // Obter o par i,j calculados na função anterior
+    // Obter o par i,j calculados na função anterior (build_MatrixM_fgAndChosePairij)
     int i_index = pairIJ[0], j_index = pairIJ[1];
     // Construir o i-sparse vector h inicialmente preenchido com 0's
-    std::vector <int> h(K-D, 0);
+    Eigen::VectorXd h = Eigen::VectorXd::Zero(K - D);
     // Array do mesmo tamanho que o acima que vai possuir os índices de h para os baralharmos
-    std::vector <int> h_index(K-D);
+    Eigen::VectorXi h_index (K - D);
     // Número de campos com valores do finite field de ordem q a preencher no i-sparse vector h e no vetor g1 respetivamente
     int nums_ToFill_I = i_index, nums_ToFill_J = j_index;
 
     // Preencher com os índices
     for(int i = 0; i < (K-D); i++)
     {
-        h_index[i] = i;
+        h_index(i) = i;
     }
 
     // Dar shuffle no array de índices para depois usar de modo a colocar os elementos de forma aleatória
     std::shuffle(h_index.begin(), h_index.end(), shuffle_random);
+
+    std::cout << "\nMostrar vetor de índices baralhado: " << '\n';
+    show_Vectorxi(h_index, K-D);
 
     // Preencher o i-sparse vector h com elementos do finite field de ordem q (mais especificamente nums_ToFill_I elementos == i_index)
     for(int j = 0; j < nums_ToFill_I; j++)
@@ -536,80 +587,74 @@ void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int q, in
         int num_finite_field = rand() % q;
         int num = num_finite_field != 0 ? num_finite_field : num_finite_field + 1;
         // Colocar os elementos de forma aleatória
-        h[h_index[j]] = num;
+        h(h_index(j)) = num;
     }
 
-    // Mostar sparse vector
-    //show_VectorSTD(h,(K-D));
+    std::cout << "\nMostrar sparse vector-i (h) com i entradas não nulas em posições aleatórias" << '\n';
+    show_Vector(h,K-D);
 
-    // Comstruir matriz G j-regular e invertível de tamanho DxD
+    // Construir matriz G j-regular e invertível de tamanho DxD
     Eigen::MatrixXd Gmatrix(D,D);
     bool invertible = false;
 
-    while(!invertible) {
-    // Temos de construir o g1 vector de tamanho D com j entradas não nulas em posições aleatórias cada uma delas com valor do finite field de ordem q
-    std::vector <int> g1vec (D,0);
-    // Array com o mesmo tamanho com o acima que vai conter os índices e que vai servir para inserir os números gerados em posições aleatórias
-    std::vector <int> g1_index(D);
-    // Valores auxiliares para guardarmo último valor e índice diferente de no vetor g1
-    /*
-    Vão funcionar da seguinte forma: 
-    Primeiro g_index leva shuffle para as posições aleatórias;
-    Com a execução do loop imaginemos que nums_ToFill_I = 3, então irá pegar nos primeiros três elementos de g_index, imaginemos agora que estes são 2,3,1
-    nesta ordem então vamos ver se o primeiro elemento de g_index neste caso 2 é maior que o lastIndex iniciado a 0, como é então guardamos o valor val na variável lastVecValue
-    e atualizamos o lastIndex que passará a ser 2 neste caso, na segunda iteração do loop vemos se g1_index[1] = 3 é maior ou igual que o lastIndex = 2 como é então atualizamos o
-    lastVecValue com o número que guardaríamos em g1vec[3], e atualizamos o lastIndex = 3, na terceira e última iteração do loop temos g1_index[2] = 1 e vemos se g1_index[2] > lastIndex que é 3
-    como não é então não atualizamos e temos que o lastIndex é 3 e o valor correspondente que ele tem. 
-    Nota que isto é útil pois obtemos o maior índice onde o valor é diferente de 0 em g1vec, tendo os índices em g1vec ex: 0,1,2,3,4,.. rapidamente percebemos então que temos a última posição do vetor
-    com um valor diferente de 0, útil para utilizarmos na rotação dos seguintes vetores.
-    */   
-    int lastIndex = 0, lastVecValue;
-    // Preencher com os índices
-    for(int i = 0; i < D; i++)
+    while(!invertible)
     {
-        g1_index[i] = i;
-    }
+        // Temos de construir o g1 vector de tamanho D com j entradas não nulas em posições aleatórias cada uma delas com valor do finite field de ordem q
+        Eigen::VectorXd g1vec = Eigen::VectorXd::Zero(D);
+        // Array com o mesmo tamanho com o acima que vai conter os índices e que vai servir para inserir os números gerados em posições aleatórias
+        Eigen::VectorXi g1_index (D);
+        // Valores auxiliares para guardarmo último valor e índice diferente de no vetor g1
+        /*
+        Vão funcionar da seguinte forma: 
+        Primeiro g_index leva shuffle para as posições aleatórias;
+        Com a execução do loop imaginemos que nums_ToFill_J = 2, 
+        
+        */
 
-    // Dar shuffle no array de índices para depois usar de modo a colocar os elementos de forma aleatória
-    std::shuffle(g1_index.begin(),g1_index.end(),shuffle_random);
+       // Preencher com os índices
+        for(int i = 0; i < D; i++)
+        {
+            g1_index(i) = i;
+        }  
 
-    // Preencher o vector g1 pertencente á matrix G com elementos do finite field de ordem q (mais especificamente nums_ToFill_J elementos == j_index)
-    for(int k = 0; k < nums_ToFill_J; k++)
-    {
-        int num_finitefield = rand() % q;
-        int val = num_finitefield != 0 ? num_finitefield : num_finitefield + 1;
-        // Colocar os elementos de forma aleatória
-        g1vec[g1_index[k]] = val;
+        // Dar shuffle no array de índices para depois usar de modo a colocar os elementos de forma aleatória
+        std::shuffle(g1_index.begin(),g1_index.end(),shuffle_random);
 
-        // Se o índice atual for maior que o último
-        // Então guardo o valor  associado a esse índice
-        if(g1_index[k] >= lastIndex)
-        {   
-            lastVecValue = val;
+        std::cout << "\nMostrar vetor de índices baralhado: " << '\n';
+        show_Vectorxi(g1_index, D);
+
+        // Preencher o vector g1 pertencente á matrix G com elementos do finite field de ordem q (mais especificamente nums_ToFill_J elementos == j_index)
+        for(int k = 0; k < nums_ToFill_J; k++)
+        {
+            int num_finitefield = rand() % q;
+            int val = num_finitefield != 0 ? num_finitefield : num_finitefield + 1;
+            // Colocar os elementos de forma aleatória
+            g1vec(g1_index(k)) = val;
         }
 
-        // Atualizo o último indíce
-        lastIndex = g1_index[k];    
+        std::cout << "\nMostrar g1 vector: " << '\n';
+        show_Vector(g1vec, D);
+
+        fillGMatrixInRecursive(Gmatrix,g1vec,D,0);
+
+        std::cout << "\nPrint Gmatrix: " << '\n';
+        show_Matrix(Gmatrix,D,D);
+
+        std::cout << "\nPrint determinante Gmatrix: " << Gmatrix.determinant() << '\n';
+
+        // Se o determinante da matriz G for maior que 0 então a matriz é invertível e podemos avançar caso contrário repetimos o processo de gerar a matriz G (Gmatrix)
+        if(Gmatrix.determinant() != 0)
+        {
+            break;
+        }
+
     }
-
-    // std::cout << "\nMostrar g1 vector " << '\n';
-    // show_VectorSTD(g1vec,D);
-    // std::cout << '\n';
-
-    // Chamada de função para construir a matriz G através da rotação e de forma recursiva
-    fillGMatrixInRecursive(Gmatrix, g1vec, D, lastVecValue,0);
-
-    // Se o determinante da matriz G for maior que 0 então a matriz é invertível e podemos avançar caso contrário repetimos o processo de gerar a matriz G
-    if(Gmatrix.determinant() != 0)
-    {
-        invertible = true;
-    }
-}
-
-    // Chamda de função para construir os N vectors
+    
+    // Chamada de função para construir os N vectors
     constructNVectors(D,K,q,i_index,L,N,symbols_subpacket,shuffle_random,messages,h,Gmatrix);
-
 }
+
+
 
 
 /*
@@ -637,11 +682,10 @@ int main ()
 
     buildShuffle_Subpackets(messages,K,L,symbols_subpacket,q,shuffle_random);
     pairIJ = build_MatrixM_fgAndChosePairij(matrix_M,K,D,L);
-    // std::cout << "Print i value: " << pairIJ[0] << '\n';
-    // std::cout << "Print j value: " << pairIJ[1] << '\n';
+     std::cout << "\nPrint i value: " << pairIJ[0] << '\n';
+     std::cout << "\nPrint j value: " << pairIJ[1] << '\n';
 
     buildSparseVectorGAndVn(pairIJ, D, K, q, L, N, symbols_subpacket, shuffle_random,messages);    
 
-    return 0;
-    
+    return 0;    
 }
