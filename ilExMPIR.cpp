@@ -368,6 +368,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
 
     std::cout << "\nPrint Matriz M: " << '\n';
     show_Matrix(matrix_M,D,D);
+    std::cout << '\n';
     show_Vector(colVec1s,D);
 
     // Agora iremos calcular as funções fT e gT definidas no documento na página 2, elementos (2) e (3) respetivamente
@@ -486,6 +487,8 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
     std::vector<Eigen::VectorXi> interference_messages;
     std::vector<Eigen::VectorXi> demand_messages;
     Eigen::VectorXi Y1 = Eigen::VectorXi::Zero(symbols_subpacket);
+    // Array que vai conter todos os vetores Y(l-1)*D+m+1 a ser calculados em que 1 <= l <= L e 1 <= m <= D 
+    std::vector <Eigen::VectorXi> Y_vectors;
 
     Eigen::VectorXi h_int = h.cast<int> ();
 
@@ -542,6 +545,43 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
 
         std::cout << "\nPrint Y1: " << '\n';
         show_Vectorxi(Y1,symbols_subpacket);
+
+        
+        // Iteramos sobre os subpacotes
+        for(int l = 0; l < L; l++)
+        {
+            // Iteramos sobre cada vetor da matriz Gmatrix
+            for(int m = 0; m < D; m++)
+            {
+                Eigen::VectorXi gm(D);
+                Eigen::VectorXi Yvec = Eigen::VectorXi::Zero(D);
+
+                // Aqui estamos a ir buscar o vetor gm à matrix Gmatrix para depois usarmos na multiplicação
+                for(int j = 0; j < D; j++)
+                {
+                    gm(j) = (int) Gmatrix(m, j);
+                }
+
+                // Percorremos as mensagens requeridas pelo user para cada uma vamos buscar o subpacote correspondente (o atual l), multiplicamos pelo elemento do vetor gm e adicionamos ao Y atual que é dado pela fórmula (l-1)*D+m+1
+                for(int i = 0; i < D; i++)
+                {
+                    Eigen::VectorXi subpacketAux = demand_messages[i*L + l];
+   
+                    Yvec += gm(i) * subpacketAux;                    
+                }
+
+                // Adicionamos-lhe o Y1 que corresponde às mensagens de interferência
+                Yvec += Y1;
+                // Guardamos o vetor Y atual no array de vetores Y
+                Y_vectors.push_back(Yvec);
+            }
+        }
+
+        for(int i = 0; i < 4; i++)
+        {
+            std::cout << "\nPrint Y" << i+2 << ": " << '\n';
+            show_Vectorxi(Y_vectors[i],symbols_subpacket);
+        }
     }
 
 }
@@ -578,7 +618,7 @@ void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int q, in
     // Dar shuffle no array de índices para depois usar de modo a colocar os elementos de forma aleatória
     std::shuffle(h_index.begin(), h_index.end(), shuffle_random);
 
-    std::cout << "\nMostrar vetor de índices baralhado: " << '\n';
+    std::cout << "\nMostrar vetor de índices baralhado h: " << '\n';
     show_Vectorxi(h_index, K-D);
 
     // Preencher o i-sparse vector h com elementos do finite field de ordem q (mais especificamente nums_ToFill_I elementos == i_index)
@@ -620,7 +660,7 @@ void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int q, in
         // Dar shuffle no array de índices para depois usar de modo a colocar os elementos de forma aleatória
         std::shuffle(g1_index.begin(),g1_index.end(),shuffle_random);
 
-        std::cout << "\nMostrar vetor de índices baralhado: " << '\n';
+        std::cout << "\nMostrar vetor de índices baralhado g1: " << '\n';
         show_Vectorxi(g1_index, D);
 
         // Preencher o vector g1 pertencente á matrix G com elementos do finite field de ordem q (mais especificamente nums_ToFill_J elementos == j_index)
@@ -682,8 +722,8 @@ int main ()
 
     buildShuffle_Subpackets(messages,K,L,symbols_subpacket,q,shuffle_random);
     pairIJ = build_MatrixM_fgAndChosePairij(matrix_M,K,D,L);
-     std::cout << "\nPrint i value: " << pairIJ[0] << '\n';
-     std::cout << "\nPrint j value: " << pairIJ[1] << '\n';
+     std::cout << "\nPrint index i value: " << pairIJ[0] << '\n';
+     std::cout << "\nPrint index j value: " << pairIJ[1] << '\n';
 
     buildSparseVectorGAndVn(pairIJ, D, K, q, L, N, symbols_subpacket, shuffle_random,messages);    
 
