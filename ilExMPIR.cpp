@@ -483,7 +483,7 @@ Função para construir N (número de servers) vetores de tamanho K * L com valo
 void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix)
 {
 
-    std::vector <Eigen::VectorXi> n_vectors (N, Eigen::VectorXi (K * L));
+    std::vector<Eigen::VectorXi> n_vectors(N, Eigen::VectorXi::Zero(K * L));
     std::vector<Eigen::VectorXi> interference_messages;
     std::vector<Eigen::VectorXi> demand_messages;
     Eigen::VectorXi Y1 = Eigen::VectorXi::Zero(symbols_subpacket);
@@ -492,17 +492,6 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
 
     Eigen::VectorXi h_int = h.cast<int> ();
 
-    // Se i = 0 então v1 é preenchido apenas com zeros, caso contrário é dado por: Y1 = h * [Xu1,1,...,XuK-D,1] ^T
-    if(i_index == 0)
-    {
-        for(int i = 0; i < K*L; i++)
-        {
-            n_vectors[0](i) = 0;
-        }
-    }
-
-    else 
-    {
         // Construir um vetor de Eigen::VectorXi para as interference messages e para as demand messages cada um vai  conter os subpacotes correspondetes ao tipo de mensagem
         for(int i = 0; i < K; i++)
         {
@@ -543,10 +532,19 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
             Y1 += h_int(k) * interference_messages[k]; 
         }
 
+        // Construir vetor de coeficientes de Y1 (vn1), no lugar dos subpacotes 1 das mensagens 3 e 4 irá colocar os respetivos coeficientes usados para calcular Y1
+        // Imaginemos vn1: 0 0 0 0 0 0 0 0 assim no princípio então passará a estar assim: 0 0 0 0 2 0 3 0 supondo que os valores dos coeficientes pertencentes ao finite field são 2 e 3
+        int index = 0;
+        for(int i = (K-D); i < K; i++)
+        {
+            n_vectors[0](i*L) = h_int(index);
+            index++;
+        }
+
         std::cout << "\nPrint Y1: " << '\n';
         show_Vectorxi(Y1,symbols_subpacket);
 
-        
+        int num_nvec = 0;
         // Iteramos sobre os subpacotes
         for(int l = 0; l < L; l++)
         {
@@ -555,6 +553,7 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
             {
                 Eigen::VectorXi gm(D);
                 Eigen::VectorXi Yvec = Eigen::VectorXi::Zero(D);
+                num_nvec++;
 
                 // Aqui estamos a ir buscar o vetor gm à matrix Gmatrix para depois usarmos na multiplicação
                 for(int j = 0; j < D; j++)
@@ -566,6 +565,7 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
                 for(int i = 0; i < D; i++)
                 {
                     Eigen::VectorXi subpacketAux = demand_messages[i*L + l];
+                    n_vectors[num_nvec][i * L + l] = gm(i);
    
                     Yvec += gm(i) * subpacketAux;                    
                 }
@@ -582,7 +582,13 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
             std::cout << "\nPrint Y" << i+2 << ": " << '\n';
             show_Vectorxi(Y_vectors[i],symbols_subpacket);
         }
+
+    for(int j = 0; j < 5; j++)
+    {
+        std::cout << "\nPrint vector vn" << j+1 << ": " << '\n';
+        show_Vectorxi(n_vectors[j], K*L);
     }
+
 
 }
 
