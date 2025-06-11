@@ -89,8 +89,10 @@ void show_Vectorxi (Eigen::VectorXi &vec, int size)
 
     for(int i = 0; i < size; i++)
     {
-        std::cout << vec(i) << " " << '\n';
+        std::cout << vec(i) << " ";
     }
+
+    std::cout << '\n';
 }
 
 
@@ -101,11 +103,12 @@ void show_VectorSTD (std::vector <int> &vec, int size)
 
     for(int i = 0; i < size; i++)
     {
-        std::cout << vec[i] << " " << '\n';
+        std::cout << vec[i] << " ";
     }
 
     std::cout << '\n';
 }
+
 
 // Função para mostrar subpackets das demand messages e interference messages
 void show_SubpacketsVectorXi (std::vector<Eigen::VectorXi> messages, size_t size, int symbols_subpacket)
@@ -118,6 +121,26 @@ void show_SubpacketsVectorXi (std::vector<Eigen::VectorXi> messages, size_t size
                 std::cout << messages[i](j) << " ";
             }
         }
+}
+
+
+/*
+    Função para após termos preenchido e baralhado o vetor dos índices dos servers agora com esse vetor enviamos vn para os servers para simular uma query (Qn^[W]) ao server n, de seguida
+    obtemos a answer (An^[W]) por parte daquele server que seria a combinação linear Y para aquele dado vetor vn.
+*/
+void show_QuerysAndAnswersServer (std::vector <int> &server_indexs, std::vector <Eigen::VectorXi> &n_vectors, std::vector <Eigen::VectorXi> &Y_vectors, int N, int L, int D, int K)
+{
+    for(int i = 0; i < N; i++)
+    {
+        std::cout << "\n--------------------------------------------------------- SERVER " << i+1 << " ---------------------------------------------------------\n";
+        // Aqui estamos a enviar para o server indicado o vetor vn como o Query (Qn^[W]) ao server (n -> server_indexs[i])
+        std::cout << "\nQuerry: " << '\n';
+        show_Vectorxi(n_vectors[server_indexs[i]], K*L);
+        // Aqui o server (n -> server_indexs[i]) vai devolver/calcular uma Answer (An^[W]) que é a combinação linear Yn para o vetor vn recebido
+        std::cout << "\nAnswer: " << '\n';
+        show_Vectorxi(Y_vectors[server_indexs[i]], D);
+        std::cout << "\n----------------------------------------------------------------------------------------------------------------------------\n";
+    }
 }
 
 
@@ -472,13 +495,13 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
 
 /*
 Função para construir N (número de servers) vetores de tamanho K * L com valores aleatórios do finite field de ordem q
-    Estes vetores são gerados um algoritmo random, baseado no conjunto de mensagens requeridas (W), as regras são as seguintes:
+    Estes vetores são gerados um algoritmo random, baseado no conjunto de mensagens de interesse (W), as regras são as seguintes:
     - Se i = 0 (i -> i_index gerado de forma aleatória anteriormente) então v1 é um vetor de zeros, caso contrário v1 é o vetor coeficiente 
     correspondente a combinação linear Y1 definida como Y1 = h * [Xu1,1,...,XuK-D,1] ^T onde h é o sparse vector calculado anteriormente e u1,...,uK-D 
     são os índices das K-D mensagens de interferência numa ordem crescente ou decrescente mas fixa.
     - Para cada 1 <= l <= L e 1 <= m <= D o vetor v(l-1)*D+m+1 é o coeficente correspondente à combinação linear Y(l-1)*D+m+1 definida como:
-    Y(l-1)*D+m+1 := Y1 + gm * [Xw,l,...XwD,l] ^T onde gm é um vetor da Gmatrix calculada anteriormente e w1,...,wD são os índices das D mensagens requeridas, numa ordem crescente ou decrescente mas fixa.
-    Imaginemos que temos 4 mensagens a,b,c,d então pelo exemplo ilustrativo do documento -> a,b são mensagens requeridas e c,d são mensagens de interferência
+    Y(l-1)*D+m+1 := Y1 + gm * [Xw,l,...XwD,l] ^T onde gm é um vetor da Gmatrix calculada anteriormente e w1,...,wD são os índices das D mensagens de interesse, numa ordem crescente ou decrescente mas fixa.
+    Imaginemos que temos 4 mensagens a,b,c,d então pelo exemplo ilustrativo do documento -> a,b são mensagens de interesse e c,d são mensagens de interferência
 */
 void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix)
 {
@@ -489,6 +512,8 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
     Eigen::VectorXi Y1 = Eigen::VectorXi::Zero(symbols_subpacket);
     // Array que vai conter todos os vetores Y(l-1)*D+m+1 a ser calculados em que 1 <= l <= L e 1 <= m <= D 
     std::vector <Eigen::VectorXi> Y_vectors;
+    // Array que vai conter todos os Zn vetores em que 2 <= n <= N onde Z1,...ZN-1 são combinações lineares independentes dos D("2")*L("2") subpacotes das mensagens de interesse
+    std::vector <Eigen::VectorXi> Z_vectors;
 
     Eigen::VectorXi h_int = h.cast<int> ();
 
@@ -532,7 +557,7 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
             Y1 += h_int(k) * interference_messages[k]; 
         }
 
-        // Construir vetor de coeficientes de Y1 (vn1), no lugar dos subpacotes 1 das mensagens 3 e 4 irá colocar os respetivos coeficientes usados para calcular Y1
+        // Construir vetor de coeficientes de Y1 (vn1), no lugar dos subpacotes 1 das mensagens 3 e 4 irá colocar os respetivos coeficientes usados para calcular Y1, tendo como base esta distribuição de pacotes no vetor neste caso ( X1,1 , X1,2 , X2,1 , X2,2 , X3,1 , X3,2 , X4,1 , X4,2 ). 
         // Imaginemos vn1: 0 0 0 0 0 0 0 0 assim no princípio então passará a estar assim: 0 0 0 0 2 0 3 0 supondo que os valores dos coeficientes pertencentes ao finite field são 2 e 3
         int index = 0;
         for(int i = (K-D); i < K; i++)
@@ -541,8 +566,9 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
             index++;
         }
 
-        std::cout << "\nPrint Y1: " << '\n';
-        show_Vectorxi(Y1,symbols_subpacket);
+        // Guardar a combinação linear Y1 no array de Y_vectors
+        Y_vectors.push_back(Y1);
+
 
         int num_nvec = 0;
         // Iteramos sobre os subpacotes
@@ -561,7 +587,8 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
                     gm(j) = (int) Gmatrix(m, j);
                 }
 
-                // Percorremos as mensagens requeridas pelo user para cada uma vamos buscar o subpacote correspondente (o atual l), multiplicamos pelo elemento do vetor gm e adicionamos ao Y atual que é dado pela fórmula (l-1)*D+m+1
+                // Percorremos as mensagens de interesse para cada uma vamos buscar o subpacote correspondente (o atual l), multiplicamos pelo elemento do vetor gm e adicionamos ao Y atual que é dado pela fórmula (l-1)*D+m+1
+                // Para além disso construímos os n_vectors que faltam para os restantes Y's 
                 for(int i = 0; i < D; i++)
                 {
                     Eigen::VectorXi subpacketAux = demand_messages[i*L + l];
@@ -577,17 +604,37 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
             }
         }
 
-        for(int i = 0; i < 4; i++)
+        // Print Y's
+        for(int i = 0; i < N; i++)
         {
-            std::cout << "\nPrint Y" << i+2 << ": " << '\n';
+            std::cout << "\nPrint Y" << i+1 << ": " << '\n';
             show_Vectorxi(Y_vectors[i],symbols_subpacket);
         }
 
-    for(int j = 0; j < 5; j++)
-    {
-        std::cout << "\nPrint vector vn" << j+1 << ": " << '\n';
-        show_Vectorxi(n_vectors[j], K*L);
-    }
+        // Print Vn's
+        for(int j = 0; j < N; j++)
+        {
+            std::cout << "\nPrint vector vn" << j+1 << ": " << '\n';
+            show_Vectorxi(n_vectors[j], K*L);
+        }
+
+        // Criar uma permutação aleatória π: [N] -> [N]
+        // Definir vetor de índices para baralhar de forma a manter a privacidade e esconder dos servidores as mensagens de interesse
+        std::vector <int> server_indexs (N);
+        for(int k = 0; k < N; k++)
+        {
+            server_indexs[k] = k;
+        } 
+
+        // Baralhar o vetor de índices para os servers
+        std::shuffle(server_indexs.begin(),server_indexs.end(),shuffle_random);
+
+        std::cout << "\n-------------------------------------------------COMUNICATIONS WITH SERVERS-------------------------------------------------" << '\n';
+
+        std::cout << "\nPrint vetor server_indexs baralhado: ";
+        show_VectorSTD(server_indexs,N);
+
+        show_QuerysAndAnswersServer(server_indexs, n_vectors, Y_vectors, N, L, D, K);
 
 
 }
