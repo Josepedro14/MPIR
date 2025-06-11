@@ -634,7 +634,22 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
         std::cout << "\nPrint vetor server_indexs baralhado: ";
         show_VectorSTD(server_indexs,N);
 
+        for(int i = 1; i < N; i++)
+        {
+            Eigen::VectorXi Zn;
+
+            Zn = Y_vectors[i] - Y_vectors[0];
+            Z_vectors.push_back(Zn);
+        }
+
         show_QuerysAndAnswersServer(server_indexs, n_vectors, Y_vectors, N, L, D, K);
+
+        std::cout << '\n';
+        for(int i = 0; i < N-1; i++)
+        {
+            std::cout << "\nPrint Z" << i+2 << ": " << '\n';
+            show_Vectorxi(Z_vectors[i],Z_vectors[i].size()); 
+        }
 
 
 }
