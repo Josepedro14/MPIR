@@ -19,7 +19,7 @@ OBJS = $(CPPSRCS:.cpp=.o)
 TARGET = mpir
 
 all: $(TARGET)
-		./$(TARGET)
+	./$(TARGET)
 
 
 $(TARGET) : $(OBJS)
