@@ -10,7 +10,7 @@ CPPSRCS = main.cpp math_operations.cpp finite_field_operations.cpp matrix_operat
 
 # Flags de Linkagem
 # NTL FLAGS
-# LDFLAGS = -lntl -lgmp -lm
+# LDFLAGS = -lntl -lgmp 
 
 # Object Files
 OBJS = $(CPPSRCS:.cpp=.o)
