@@ -18,7 +18,7 @@ Função para preencher o atributo mensagens com elementos;
     para isso usamos o método shuffle em que para uma determinada mensagem passamos-lhe o ínico dos 
     subpackets o fim e o shuffle_random para ele os embaralhar.
 */
-void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int symbols_subpacket, int q, std::mt19937 shuffle_random);
+void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int symbols_subpacket, std::mt19937 shuffle_random);
 
 
 
@@ -27,7 +27,7 @@ Função para calcular a Matriz M da página 2 do documento elemento (1).
     É uma matriz de tamanho DxD, que irá ser usada para calcular as funções f e g úteis para a escolha das probabilidades
     Cada elemento da matriz necessita do uso da função acima definida
 */
-std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int K, int D, int L);
+std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int K, int D, int L, ZZ maxVal);
 
 
 
@@ -38,7 +38,7 @@ Regras da matriz G são as seguintes:
     i) O vetor g1 possui exatamente j entradas não nulas em posições random
     ii) Para cada 2 <= m <= D, as posições da entradas diferentes de 0 no vetor gm são uma rotação circular das posições das entradas não nulas do vetor gm-1 (o anterior)
 */
-void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int q, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random,std::vector<Message> &messages);
+void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random,std::vector<Message> &messages);
 
 
 
@@ -52,4 +52,4 @@ Função para construir N (número de servers) vetores de tamanho K * L com valo
     Y(l-1)*D+m+1 := Y1 + gm * [Xw,l,...XwD,l] ^T onde gm é um vetor da Gmatrix calculada anteriormente e w1,...,wD são os índices das D mensagens de interesse, numa ordem crescente ou decrescente mas fixa.
     Imaginemos que temos 4 mensagens a,b,c,d então pelo exemplo ilustrativo do documento -> a,b são mensagens de interesse e c,d são mensagens de interferência
 */
-void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix);
+void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix);

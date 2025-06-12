@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "finite_field_operations.h"
 
 /* 
 Definir uma estrutura para subpacotes;
@@ -9,7 +10,7 @@ Definir uma estrutura para subpacotes;
 */
 struct Subpacket
 {
-    std::vector <int> numsR_finite_field;
+    std::vector <ZZ_p> numsR_finite_field;
 };
 
 

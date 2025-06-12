@@ -7,10 +7,8 @@ CXXFLAGS = -Wall -I /usr/include/eigen3
 # Source Files
 CPPSRCS = main.cpp math_operations.cpp finite_field_operations.cpp matrix_operations.cpp mpir_functions.cpp print_operations.cpp random_operations.cpp
 
-
-# Flags de Linkagem
-# NTL FLAGS
-# LDFLAGS = -lntl -lgmp 
+# NTL FLAG
+LDFLAGS = -lntl
 
 # Object Files
 OBJS = $(CPPSRCS:.cpp=.o)
@@ -20,10 +18,10 @@ TARGET = mpir
 
 all: $(TARGET)
 	./$(TARGET)
-
+	
 
 $(TARGET) : $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET) 
+		$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
 	
 # Compilar source files em object files

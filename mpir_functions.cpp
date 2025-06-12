@@ -1,7 +1,7 @@
 #include "mpir_functions.h"
+#include "finite_field_operations.h"
 
-
-void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int symbols_subpacket, int q, std::mt19937 shuffle_random)
+void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int symbols_subpacket, std::mt19937 shuffle_random)
 {
     // Iterar sobre as mensagens
     for(int i = 0; i < K; i++)
@@ -15,7 +15,7 @@ void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int s
             // Gerar números aleatórios do finite field de ordem q e adicioná-los ao subpacket
             for(int k = 0; k < symbols_subpacket; k++)
             {
-                int finite_field_num = rand() % q;
+                ZZ_p finite_field_num = random_ZZ_p();
                 new_subpacket.numsR_finite_field.push_back(finite_field_num);
             }
 
@@ -33,7 +33,7 @@ void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int s
 
 
 
-std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int K, int D, int L)
+std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int K, int D, int L, ZZ maxVal)
 {
      // Define uma matriz identidade DxD para auxilidar no cálculo das funções f e g
     Eigen::MatrixXd identityMatrix = Eigen::MatrixXd::Identity(D,D);
@@ -166,14 +166,14 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
     // Define vetor que conterá o par obtido pelas probabilidades e está disposto pela ordem i,j
     std::vector <int> pairChosenValues;
     
-    pairChosenValues = chooseAleatoryPair(matrixProb, K, D, pairChosenValues);
+    pairChosenValues = chooseAleatoryPair(matrixProb, K, D, pairChosenValues, maxVal);
 
     return pairChosenValues;  
 }
 
 
 
-void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int q, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random,std::vector<Message> &messages)
+void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random,std::vector<Message> &messages)
 {
     // Obter o par i,j calculados na função anterior (build_MatrixM_fgAndChosePairij)
     int i_index = pairIJ[0], j_index = pairIJ[1];
@@ -199,8 +199,12 @@ void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int q, in
     // Preencher o i-sparse vector h com elementos do finite field de ordem q (mais especificamente nums_ToFill_I elementos == i_index)
     for(int j = 0; j < nums_ToFill_I; j++)
     {
-        int num_finite_field = rand() % q;
-        int num = num_finite_field != 0 ? num_finite_field : num_finite_field + 1;
+        ZZ_p num_finite_field = random_ZZ_p();
+        int num = conv<int>(num_finite_field);
+        if(num == 0)
+        {
+            num = conv<int>(num_finite_field + ZZ_p(1));
+        }
         // Colocar os elementos de forma aleatória
         h(h_index(j)) = num;
     }
@@ -241,8 +245,12 @@ void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int q, in
         // Preencher o vector g1 pertencente á matrix G com elementos do finite field de ordem q (mais especificamente nums_ToFill_J elementos == j_index)
         for(int k = 0; k < nums_ToFill_J; k++)
         {
-            int num_finitefield = rand() % q;
-            int val = num_finitefield != 0 ? num_finitefield : num_finitefield + 1;
+            ZZ_p num_finitefield = random_ZZ_p();
+            int val= conv<int>(num_finitefield);
+            if(val == 0)
+            {
+                val = conv<int>(num_finitefield + ZZ_p(1));
+            }
             // Colocar os elementos de forma aleatória
             g1vec(g1_index(k)) = val;
         }
@@ -266,12 +274,12 @@ void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int q, in
     }
     
     // Chamada de função para construir os N vectors
-    constructNVectors(D,K,q,i_index,L,N,symbols_subpacket,shuffle_random,messages,h,Gmatrix);
+    constructNVectors(D,K,i_index,L,N,symbols_subpacket,shuffle_random,messages,h,Gmatrix);
 }
 
 
 
-void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix)
+void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix)
 {
 
     std::vector<Eigen::VectorXi> n_vectors(N, Eigen::VectorXi::Zero(K * L));
@@ -295,7 +303,7 @@ void constructNVectors (int D, int K,int q, int i_index, int L, int N, int symbo
 
                 for(int k = 0; k < symbols_subpacket; k++)
                 {
-                    vecAux(k) = messages[i].subpackets[j].numsR_finite_field[k];
+                     vecAux(k) = conv<int>(messages[i].subpackets[j].numsR_finite_field[k]);
                 }
 
                 // Armazenar nas interference messages o 1º subpacote de cada mensagem de interferência 
