@@ -7,7 +7,7 @@ Definição da função principal
     N -> Número de Servers
     D -> Número de mensagens pretendidas
     q -> finite field de ordem q (q >= 3 && tem de ser primo)
-    m -> tamanho de cada mensagem (tem de ser par)
+    m -> tamanho de cada mensagem ( m>= 2 e tem de ser par)
     L -> Grau de Subpacketização
 */
 int main ()
@@ -15,9 +15,9 @@ int main ()
     int K = 4, N = 5, D = 2, m = 4;
     int L = (N-1) / D, symbols_subpacket = m/L;
     // Não pode ser mais que 31 bits (valor para o máximo para o int), pois estou a converter de ZZ_p para int nos vetores Eigen então não posso gerar um número ZZ_p maior que o máximo de int
-    int max_bits = 10;
+    int max_bits = 3;
 
-    ZZ maxVal = conv<ZZ>("1000000");
+    ZZ maxVal = conv<ZZ>(1000000);
 
     ZZ q;
     RandomPrime(q,max_bits,10);
