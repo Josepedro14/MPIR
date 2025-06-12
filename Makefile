@@ -23,7 +23,7 @@ all: $(TARGET)
 
 
 $(TARGET) : $(OBJS)
-		$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET) 
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET) 
 
 	
 # Compilar source files em object files
