@@ -20,8 +20,11 @@ int main ()
     ZZ maxVal = conv<ZZ>(1000000);
 
     ZZ q;
-    RandomPrime(q,max_bits,10);
 
+    do{
+        RandomPrime(q,max_bits,10);
+    }while (conv<int>(q) < 3);
+    
     ZZ_p::init(q);
 
     std::cout << "\nPrint ordem do finite field: " << conv<int>(q) << '\n';

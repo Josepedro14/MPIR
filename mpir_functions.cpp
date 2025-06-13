@@ -338,7 +338,7 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
         // Construir vetor de coeficientes de Y1 (vn1), no lugar dos subpacotes 1 das mensagens 3 e 4 irá colocar os respetivos coeficientes usados para calcular Y1, tendo como base esta distribuição de pacotes no vetor neste caso ( X1,1 , X1,2 , X2,1 , X2,2 , X3,1 , X3,2 , X4,1 , X4,2 ). 
         // Imaginemos vn1: 0 0 0 0 0 0 0 0 assim no princípio então passará a estar assim: 0 0 0 0 2 0 3 0 supondo que os valores dos coeficientes pertencentes ao finite field são 2 e 3
         int index = 0;
-        for(int i = (K-D); i < K; i++)
+        for(int i = D; i < K; i++)
         {
             n_vectors[0](i*L) = h_int(index);
             index++;
