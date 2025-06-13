@@ -27,4 +27,4 @@ void show_SubpacketsVectorXi (std::vector<Eigen::VectorXi> messages, size_t size
 
 // Função para após termos preenchido e baralhado o vetor dos índices dos servers agora com esse vetor enviamos vn para os servers para simular uma query (Qn^[W]) ao server n, de seguida
 // obtemos a answer (An^[W]) por parte daquele server que seria a combinação linear Y para aquele dado vetor vn.
-void show_QuerysAndAnswersServer (std::vector <int> &server_indexs, std::vector <Eigen::VectorXi> &n_vectors, std::vector <Eigen::VectorXi> &Y_vectors, int N, int L, int D, int K);
+void show_QuerysAndAnswersServer (std::vector <int> &server_indexs, std::vector <Eigen::VectorXi> &n_vectors, std::vector <Eigen::VectorXi> &Y_vectors, int N, int L, int K, int symbols_subpacket);

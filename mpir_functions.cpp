@@ -27,6 +27,7 @@ void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int s
         std::shuffle(messages[i].subpackets.begin(),messages[i].subpackets.end(),shuffle_random);
     }
 
+    std::cout << '\n';
     // Chamar função de print para as mensagens e respetivos subpacotes
     show_MessagesSubpackets(messages,K,L,symbols_subpacket);
 }
@@ -307,7 +308,7 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
                 }
 
                 // Armazenar nas interference messages o 1º subpacote de cada mensagem de interferência 
-                if(i >= K-D && j == 0)
+                if(i >= D && j == 0)
                 {
                     interference_messages.push_back(vecAux);
                 }
@@ -355,7 +356,7 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
             for(int m = 0; m < D; m++)
             {
                 Eigen::VectorXi gm(D);
-                Eigen::VectorXi Yvec = Eigen::VectorXi::Zero(D);
+                Eigen::VectorXi Yvec = Eigen::VectorXi::Zero(symbols_subpacket);
                 num_nvec++;
 
                 // Aqui estamos a ir buscar o vetor gm à matrix Gmatrix para depois usarmos na multiplicação
@@ -411,6 +412,6 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
         std::cout << "\nPrint vetor server_indexs baralhado: ";
         show_VectorSTD(server_indexs,N);
     
-        show_QuerysAndAnswersServer(server_indexs, n_vectors, Y_vectors, N, L, D, K);
+        show_QuerysAndAnswersServer(server_indexs, n_vectors, Y_vectors, N, L, K, symbols_subpacket);
 
 }
