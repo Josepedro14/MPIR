@@ -13,7 +13,7 @@ LDFLAGS = -lntl
 # Object Files
 OBJS = $(CPPSRCS:.cpp=.o)
 	
-# Executável
+# Nome Executável
 TARGET = mpir
 
 all: $(TARGET)

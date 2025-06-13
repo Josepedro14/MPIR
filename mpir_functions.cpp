@@ -112,7 +112,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
     // Para as probabilidades e possíveis pares (i,j) temos -> 
     // Neste exemplo os conjuntos possíveis seriam: (0,1);(0,2);(1,1);(1,2);(2,1);(2,2)
     Eigen::VectorXd probabilitiesPjD (D);
-    /// Definir matriz onde junto as probabilidades calculadas para depois sortear
+    // Definir matriz onde junto as probabilidades calculadas para depois sortear
     Eigen::MatrixXd matrixProb((K-D) + 1, D);
 
     for(int i = 0; i < D; i++)
@@ -120,7 +120,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
         // Se i = j* então Pk-d,i = 1/gj* 
         if(i == indexJ)
         {
-            probabilitiesPjD(i) = (double) (1 / gT(indexJ));
+            probabilitiesPjD(i) = 1.0 / gT(indexJ);
         }
 
         // caso contrário Pk-d,i = 0.0
@@ -146,8 +146,9 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
     {   
         // Calcular M^k-d-i
         Eigen::MatrixXd matrixAux = multiplyMatrixNTimes(matrix_M, (K-D) - i, D);
-        //
-        Eigen::VectorXd probabilitiesPiD = calculateCombinations((K-D),i) * matrixAux * probabilitiesPjD;
+        // Calcular probabilidades Pi,D
+        double combinations = (double)calculateCombinations((K-D),i);
+        Eigen::VectorXd probabilitiesPiD = combinations * matrixAux * probabilitiesPjD;
         
         // Passsar os valores para a matriz das probabilidades
         for(int j = 0; j < D; j++)
@@ -162,7 +163,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
             show_Matrix(matrixProb,(K-D) + 1, D);
     }
 
-     std::cout << "\nSoma das probabilidades de todos os pares: " << matrixProb.sum() << '\n'; 
+     std::cout << "\nSoma de todas as probabilidades da Matriz: " << matrixProb.sum() << '\n'; 
 
     // Define vetor que conterá o par obtido pelas probabilidades e está disposto pela ordem i,j
     std::vector <int> pairChosenValues;
@@ -173,8 +174,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
 }
 
 
-
-void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random,std::vector<Message> &messages)
+void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random,std::vector<Message> &messages)
 {
     // Obter o par i,j calculados na função anterior (build_MatrixM_fgAndChosePairij)
     int i_index = pairIJ[0], j_index = pairIJ[1];
@@ -215,9 +215,8 @@ void buildSparseVectorGAndVn (std::vector <int> &pairIJ, int D, int K, int L, in
 
     // Construir matriz G j-regular e invertível de tamanho DxD
     Eigen::MatrixXd Gmatrix(D,D);
-    bool invertible = false;
-
-    while(!invertible)
+    
+    while(true)
     {
         // Temos de construir o g1 vector de tamanho D com j entradas não nulas em posições aleatórias cada uma delas com valor do finite field de ordem q
         Eigen::VectorXd g1vec = Eigen::VectorXd::Zero(D);

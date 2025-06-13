@@ -29,5 +29,8 @@ std::vector <int> chooseAleatoryPair (Eigen::MatrixXd &matrixProb, int K, int D,
         }
     }
 
+    // Valores default para i,j caso não encontre nenhum no for
+    pairChosenValues.push_back(0);
+    pairChosenValues.push_back(1);
     return pairChosenValues;
 }

@@ -30,5 +30,5 @@ int calculateCombinations (int D, int j)
 
 double calculateBJForM (int j, int D, int L)
 {
-    return (double) ((D * L) / calculateCombinations(D,j));
+    return (double)(D * L) / (double)calculateCombinations(D,j);
 }
