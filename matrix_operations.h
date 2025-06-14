@@ -3,11 +3,10 @@
 #include <eigen3/Eigen/Dense>
 
 
-
-// Função que calcula a multiplicação de uma matriz (D,D) por ela mesma N vezes.
+// Função que calcula a multiplicação de uma matriz (D,D) por ela mesma num_of_times vezes.
 //
-// Suponhamos D = 2, N = 1 e a matrix_M seguinte: [ 2   1 ]
-//                                             [ 1   2 ]
+// Suponhamos D = 2, num_of_times = 2 e a matrix_M seguinte: [ 2   1 ]
+//                                                           [ 1   2 ]
 // Exemplo:
 //  matrix_M X matrix_M = [ 2   1 ]  X  [ 2   1 ]  =   [ 5   4 ]
 //                        [ 1   2 ]     [ 1   2 ]      [ 4   5 ]

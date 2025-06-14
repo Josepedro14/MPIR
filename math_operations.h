@@ -1,5 +1,6 @@
 #pragma once
 
+
 // Funções Matemáticas Auxiliares
 
 
@@ -22,10 +23,10 @@ int calculateCombinations (int D, int j);
 
 
 
-// Função para calcular Bj := D * L / C(D,j).
+// Função para calcular βj := D * L / C(D,j).
 //
 //  Exemplo:
 //      Dado j = 1, D = 5 e L = 2, temos:
-//      B1 = 5 * 2 / C(5,1) = 2 
+//      β1 = 5 * 2 / C(5,1) = 2 
 // Este elemento vai ser posteriormente utilizado no cálculo da Matriz M presente na página 2 do documento elemento (1) ( mpir_functions.cpp -> função: build_MatrixM_fgAndChosePairij ).
 double calculateBJForM (int j, int D, int L);

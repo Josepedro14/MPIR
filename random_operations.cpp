@@ -1,12 +1,13 @@
 #include "random_operations.h"
 
 
-std::vector <int> chooseAleatoryPair (Eigen::MatrixXd &matrixProb, int K, int D, std::vector<int> &pairChosenValues, ZZ maxVal)
+void chooseAleatoryPair (Eigen::MatrixXd &matrixProb, int K, int D, std::vector<int> &pairValues, ZZ maxVal)
 {
-    // Gerar um número aleatório entre 0 e maxVal [0,maxVal) para usar nas probabilidades
+    // Gerar um número aleatório entre 0 e maxVal [0,maxVal)
     ZZ random_num = RandomBnd(maxVal);
-    // Converter esse número para double (NTL não tem float nem double)
+    // Obtemos um valor aleatório entre [0,1) através da divisão do valores gerado com o passado em parâmetro
     double random = conv<double>(random_num) / conv<double>(maxVal);
+    // variável de controlo para escolha do par (i,j) consoante o 'random' gerado
     double sum = 0.0;
 
      std::cout << "\nProbabilidade do número gerado: " << random << '\n';
@@ -16,21 +17,20 @@ std::vector <int> chooseAleatoryPair (Eigen::MatrixXd &matrixProb, int K, int D,
     {
         for(int j = 0; j < D; j++)
         {
-            // Temos o valor de soma que comparamos com o número aleatório
+            
             sum += matrixProb(i,j);
 
-            if(random <= sum)
+            // Comparamos o valor de sum com random se for maior ou igual significa que já passamos, então na posição do último elemento que adicionámos
+            // vamos buscar o valor da linha e colocamos em i e vamos buscar o valor da coluna + 1 e colocamos em j. 
+            if(sum >= random)
             {
-                // Atribuímos i,j consoante o valor de sum no momento
-                pairChosenValues.push_back(i);
-                pairChosenValues.push_back(j+1);
-                return pairChosenValues;
+                pairValues.push_back(i);
+                pairValues.push_back(j+1);
             }
         }
     }
 
-    // Valores default para i,j caso não encontre nenhum no for
-    pairChosenValues.push_back(0);
-    pairChosenValues.push_back(1);
-    return pairChosenValues;
+    // Valores default para par (i,j) caso nenhum seja encontrado no for.
+    pairValues.push_back(0);
+    pairValues.push_back(1);
 }

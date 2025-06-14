@@ -3,15 +3,15 @@
 
 void show_MessagesSubpackets (std::vector <Message> &messages, int K, int L, int symbols_subpacket)
 {
-    // Iterar sobre as mensagens 
+    // Percorre as mensagens 
     for(int i = 0; i < K; i++)
     {
         std::cout << "Message " << i+1 << ": " << '\n';
-        //  Iterar sobre os subpacotes
+        //  Itera sobre os subpacotes da mensagem
         for(int j = 0; j < L; j++)
         {
             std::cout << "Subpacket " << j+1 << ": " << '\n';
-            // Iterar sobre os elementos dos subpacotes
+            // Printa os elementos dos subpacotes da mensagem atual
             for(int k = 0; k < symbols_subpacket; k++)
             {
                 std::cout << "Value: " << messages[i].subpackets[j].numsR_finite_field[k] << '\n';
@@ -24,10 +24,9 @@ void show_MessagesSubpackets (std::vector <Message> &messages, int K, int L, int
 
 
 
-
 void show_Matrix (Eigen::MatrixXd &matrix, int rows, int cols)
 {
-    std::cout << "Matriz:" << '\n';
+    std::cout << "Matriz :" << '\n';
 
     for(int line = 0; line < rows; line++)
     {
@@ -70,7 +69,7 @@ void show_Vectorxi (Eigen::VectorXi &vec, int size)
 
 void show_VectorSTD (std::vector <int> &vec, int size)
 {
-    std::cout << "\nVector STD: " << '\n';
+    std::cout << "\nVector std: " << '\n';
 
     for(int i = 0; i < size; i++)
     {
@@ -82,8 +81,9 @@ void show_VectorSTD (std::vector <int> &vec, int size)
 
 
 
-void show_SubpacketsVectorXi (std::vector<Eigen::VectorXi> messages, size_t size, int symbols_subpacket)
-{
+void show_SubpacketsVectorXi (std::vector <Eigen::VectorXi> messages, size_t size, int symbols_subpacket)
+{   
+    // Iteramos sobre os subpacotes das mensagens de interesse ou interferência e damos print aos valores que os mesmos contêm
      for(size_t i = 0; i < messages.size(); i++)
         {
             std::cout << "\nPrint subpacotes das mensagens: " << '\n';
@@ -98,7 +98,7 @@ void show_SubpacketsVectorXi (std::vector<Eigen::VectorXi> messages, size_t size
 
 void show_QuerysAndAnswersServer (std::vector <int> &server_indexs, std::vector <Eigen::VectorXi> &n_vectors, std::vector <Eigen::VectorXi> &Y_vectors, int N, int L, int K, int symbols_subpacket)
 {
-
+    // Print comunicações com os servers
     for(int i = 0; i < N; i++)
     {
         std::cout << "\n--------------------------------------------------------- SERVER " << i+1 << " ---------------------------------------------------------\n";

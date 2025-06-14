@@ -33,7 +33,7 @@ void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int s
 
 
 // Função para calcular a Matriz M da página 2 do documento elemento (1).
-// É uma matriz quadrada (D,D), que irá ser usada para calcular as funções fT e gT que irão ser usadas no cálculo de probabilidades.
+// É uma matriz quadrada (D,D), que irá ser usada para calcular as funções f e g que irão ser usadas no cálculo de probabilidades.
 // Após calculadas as probabilidades esta função retorna um par (i,j) escolhido aleatoriamente.
 //
 // Parâmetros:
