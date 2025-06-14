@@ -39,7 +39,7 @@ int sub_modFq (int a, int b);
 int mult_modFq (int a, int b);
 
 
-// Adição em Fq para vetores Eigen
+// Adição em Fq para vetores Eigen::VectorXi
 //
 // Supondo dois vetores vec1 e vec2 do mesmo tamanho e que contém elementos de Fq (finite field de ordem q = 5).
 // Esta função aplica a operação de adição (add_modFq) e retorna um novo vetor do mesmo tamanho de vec1 e vec2 com o resultado.
@@ -50,13 +50,25 @@ int mult_modFq (int a, int b);
 Eigen::VectorXi addVectorsFq (const Eigen::VectorXi &vec1, const Eigen::VectorXi &vec2);
 
 
-// Multiplicação em Fq para vetores Eigen
+// Multiplicação em Fq para vetor Eigen::VectorXi e um escalar
 //
 // Dado um vetor vec1 e um elemento val, ambos pertencentes ao conjunto de elementos de Fq (finite field de ordem q = 5).
-// Esta função aplica a operação de multiplicação (mult_modFq) a cada elemento de vec1 com val e retorna um novo vetor do mesmo tamanho de vec1 com o resultado.
+// Esta função aplica a operação de multiplicação (mult_modFq) a cada elemento de vec1 com val e retorna um novo vetor do mesmo tamanho (vec1) com o resultado.
 // Exemplo:
 //   vec1 = (1, 2, 3, 4)
 //   val = 2
 //   Output = (2, 4, 1, 3)
 Eigen::VectorXi multVectorXVal (const Eigen::VectorXi &vec1, int val);
+
+
+// Subtração em Fq para vetores Eigen::VectorXi
+//
+// Supondo dois vetores vec1 e vec2 do mesmo tamanho e que contém elementos de Fq (finite field de ordem q = 5).
+// Esta função aplica a operação de subtração (sub_modFq) e retorna um novo vetor do mesmo tamanho de vec1 e vec2 com o resultado.
+// Exemplo:
+//   vec1 = (4, 3, 2, 4)
+//   vec2 = (1, 1, 2, 1)
+//   Output = (3, 2, 0, 3)
+Eigen::VectorXi subVectorsFq(const Eigen::VectorXi &vec1, const Eigen::VectorXi &vec2);
+
 

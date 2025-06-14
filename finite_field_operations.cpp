@@ -40,7 +40,7 @@ int mult_modFq (int a, int b)
 
 
 // Função que faz a adição de dois vetores (Eigen::VectorXi) sobre Fq
-// Cada elemento do novo vetor (vec_res) é obtido através da adição sobre Fq e de dois elementos um de vec1 e um de vec2
+// Cada elemento do novo vetor (vec_res) é obtido através da adição sobre Fq de dois elementos um de vec1 e um de vec2
 // Esta função é aplicada em vetores com o mesmo tamanho (vec1.size() == vec2.size())
 Eigen::VectorXi addVectorsFq (const Eigen::VectorXi &vec1, const Eigen::VectorXi &vec2)
 {
@@ -66,6 +66,23 @@ Eigen::VectorXi multVectorXVal (const Eigen::VectorXi &vec1, int val)
     for(int i = 0; i < vec1.size(); i++)
     {
         vec_res(i) = mult_modFq(vec1(i), val);
+    }
+
+    return vec_res;
+}
+
+
+// Função que faz a subtração de dois vetores (Eigen::VectorXi) sobre Fq
+// Cada elemento do novo vetor (vec_res) é obtido através da subtração sobre Fq de dois elementos um de vec1 e um de vec2
+// Esta função é aplicada em vetores com o mesmo tamanho (vec1.size() == vec2.size())
+Eigen::VectorXi subVectorsFq(const Eigen::VectorXi &vec1, const Eigen::VectorXi &vec2)
+{
+    Eigen::VectorXi vec_res (vec1.size());
+
+    // Aplicamos a função definida acima (sub_modFq)
+    for(int i = 0; i < vec1.size(); i++)
+    {
+        vec_res(i) = sub_modFq(vec1(i),vec2(i));
     }
 
     return vec_res;

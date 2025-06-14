@@ -342,7 +342,7 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
         std::cout << "\nPrint interference messages (subpacket 1) messages (K-D...K): " << '\n';
         show_SubpacketsVectorXi(interference_messages,interference_messages.size(),symbols_subpacket);
         std::cout << '\n';
-        std::cout << "\nPrint demand messages (subpacket 0...D) messages (0...D): " << '\n';
+        std::cout << "\nPrint demand messages (subpacket 0...L) messages (0...D): " << '\n';
         show_SubpacketsVectorXi(demand_messages,demand_messages.size(),symbols_subpacket);
         std::cout << '\n';
 
@@ -385,6 +385,7 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
 
                 // Percorremos as mensagens de interesse para cada uma vamos buscar o subpacote correspondente (o atual l), multiplicamos pelo elemento do vetor gm e adicionamos ao Y atual que é dado pela fórmula (l-1)*D+m+1
                 // Para além disso construímos os n_vectors que faltam para os restantes Y's 
+                // Utilizamos as funções de adição de vetores e multiplicação de vetor por um escalar sobre Fq definidas no ficheiro (finite_field_operations.cpp)
                 for(int i = 0; i < D; i++)
                 {
                     Eigen::VectorXi subpacketAux = demand_messages[i*L + l];
@@ -432,5 +433,23 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
         
         // Chamar função para simular conversas com os servers
         show_QuerysAndAnswersServer(server_indexs, n_vectors, Y_vectors, N, L, K, symbols_subpacket);
+
+        // Calculamos o valor das combinações lineares Yn com 2 <= n <= N, sem a interferência de Y1 em cada uma delas
+        // Utilizamos a função de subtração de vetores sobre Fq definida no ficheiro (finite_field_operations.cpp)
+        for(int i = 1; i < N; i++)
+        {
+            Eigen::VectorXi Zvec(symbols_subpacket);
+
+            Zvec = subVectorsFq(Y_vectors[i],Y1);
+            Z_vectors.push_back(Zvec);
+        } 
+
+
+        // Print Zn's
+        for(int j = 0; j < N-1; j++)
+        {
+            std::cout << "\nPrint vector Zn" << j+1 << ": " << '\n';
+            show_Vectorxi(Z_vectors[j], symbols_subpacket);
+        }
 
 }
