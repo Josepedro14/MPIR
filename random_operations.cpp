@@ -5,7 +5,7 @@ void chooseAleatoryPair (Eigen::MatrixXd &matrixProb, int K, int D, std::vector<
 {
     // Gerar um número aleatório entre 0 e maxVal [0,maxVal)
     ZZ random_num = RandomBnd(maxVal);
-    // Obtemos um valor aleatório entre [0,1) através da divisão do valores gerado com o passado em parâmetro
+    // Obtemos um valor aleatório entre [0,1) através da divisão do valor gerado com o passado em parâmetro
     double random = conv<double>(random_num) / conv<double>(maxVal);
     // variável de controlo para escolha do par (i,j) consoante o 'random' gerado
     double sum = 0.0;

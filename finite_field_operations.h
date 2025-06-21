@@ -47,7 +47,7 @@ int mult_modFq (int a, int b);
 //   vec1 = (1, 2, 3, 4)
 //   vec2 = (4, 2, 3, 1)
 //   Output = (0, 4, 1, 0)
-Eigen::VectorXi addVectorsFq (const Eigen::VectorXi &vec1, const Eigen::VectorXi &vec2);
+Eigen::VectorXi addVectorsFq (Eigen::VectorXi vec1, Eigen::VectorXi vec2);
 
 
 // Multiplicação em Fq para vetor Eigen::VectorXi e um escalar
@@ -58,7 +58,7 @@ Eigen::VectorXi addVectorsFq (const Eigen::VectorXi &vec1, const Eigen::VectorXi
 //   vec1 = (1, 2, 3, 4)
 //   val = 2
 //   Output = (2, 4, 1, 3)
-Eigen::VectorXi multVectorXVal (const Eigen::VectorXi &vec1, int val);
+Eigen::VectorXi multVectorXVal (Eigen::VectorXi vec1, int val);
 
 
 // Subtração em Fq para vetores Eigen::VectorXi
@@ -69,6 +69,6 @@ Eigen::VectorXi multVectorXVal (const Eigen::VectorXi &vec1, int val);
 //   vec1 = (4, 3, 2, 4)
 //   vec2 = (1, 1, 2, 1)
 //   Output = (3, 2, 0, 3)
-Eigen::VectorXi subVectorsFq(const Eigen::VectorXi &vec1, const Eigen::VectorXi &vec2);
+Eigen::VectorXi subVectorsFq(Eigen::VectorXi vec1, Eigen::VectorXi vec2);
 
 

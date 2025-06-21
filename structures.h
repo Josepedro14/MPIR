@@ -19,7 +19,7 @@ struct Subpacket
 //    - L -> representa o grau de supacketização (número de subpacotes em que é dividida cada mensagem)
 //    - m -> tamanho de cada mensagem
 //
-// Cada subpacote contém m/L símbolos
+// Cada subpacote contém m/L símbolos = symbols_subpacket
 struct Message
 {
     std::vector <Subpacket> subpackets;

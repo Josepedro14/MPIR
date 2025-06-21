@@ -42,7 +42,7 @@ int mult_modFq (int a, int b)
 // Função que faz a adição de dois vetores (Eigen::VectorXi) sobre Fq
 // Cada elemento do novo vetor (vec_res) é obtido através da adição sobre Fq de dois elementos um de vec1 e um de vec2
 // Esta função é aplicada em vetores com o mesmo tamanho (vec1.size() == vec2.size())
-Eigen::VectorXi addVectorsFq (const Eigen::VectorXi &vec1, const Eigen::VectorXi &vec2)
+Eigen::VectorXi addVectorsFq (Eigen::VectorXi vec1, Eigen::VectorXi vec2)
 {
     Eigen::VectorXi vec_res (vec2.size());
 
@@ -58,7 +58,7 @@ Eigen::VectorXi addVectorsFq (const Eigen::VectorXi &vec1, const Eigen::VectorXi
 
 // Função que faz a multiplicação de um escalar por um vetor (Eigen::VectorXi) sobre Fq (o escalar pertence a Fq)
 // Cada elemento do novo vetor (vec_res) é obtido através da multiplicação sobre Fq entre o escalar e o elemento vec1(i) 
-Eigen::VectorXi multVectorXVal (const Eigen::VectorXi &vec1, int val)
+Eigen::VectorXi multVectorXVal (Eigen::VectorXi vec1, int val)
 {
     Eigen::VectorXi vec_res(vec1.size());
 
@@ -75,7 +75,7 @@ Eigen::VectorXi multVectorXVal (const Eigen::VectorXi &vec1, int val)
 // Função que faz a subtração de dois vetores (Eigen::VectorXi) sobre Fq
 // Cada elemento do novo vetor (vec_res) é obtido através da subtração sobre Fq de dois elementos um de vec1 e um de vec2
 // Esta função é aplicada em vetores com o mesmo tamanho (vec1.size() == vec2.size())
-Eigen::VectorXi subVectorsFq(const Eigen::VectorXi &vec1, const Eigen::VectorXi &vec2)
+Eigen::VectorXi subVectorsFq (Eigen::VectorXi vec1, Eigen::VectorXi vec2)
 {
     Eigen::VectorXi vec_res (vec1.size());
 

@@ -48,7 +48,7 @@ int main ()
     std::cout << "\nPrint index i value: " << pairIJ[0] << '\n';
     std::cout << "\nPrint index j value: " << pairIJ[1] << '\n';
 
-    buildSparseVectorHAndG(pairIJ, D, K, L, N, symbols_subpacket, shuffle_random, messages);    
+    buildSparseVectorHAndG(pairIJ, D, K, L, N, symbols_subpacket, shuffle_random, messages, q);    
 
     return 0;    
 }

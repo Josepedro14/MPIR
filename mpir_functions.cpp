@@ -114,7 +114,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
 
     std::cout << "\nPrint index j*: " << indexJ << " e o maxValfDIVg para esse j* é: " << maxValfDIVg << '\n';
 
-    // Para as probabilidades e possíveis pares (i,j) temos -> (0,1);(0,2);(1,1);(1,2);(2,1);(2,2)
+    // Para as probabilidades e possíveis pares (i,j) no exemplo ilustrativo temos -> (0,1);(0,2);(1,1);(1,2);(2,1);(2,2)
     Eigen::VectorXd probabilitiesPjD (D);
     // Definir matriz onde junto as probabilidades calculadas para depois sortear
     Eigen::MatrixXd matrixProb((K-D) + 1, D);
@@ -185,7 +185,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
 // Regras da matriz G são as seguintes:
 //     i) O vetor g1 possui exatamente j entradas não nulas em posições random
 //     ii) Para cada 2 <= m <= D, as posições das entradas diferentes de 0 no vetor gm são uma rotação circular das posições das entradas não nulas do vetor gm-1 (o anterior)
-void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random,std::vector<Message> &messages)
+void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random,std::vector<Message> &messages, ZZ q)
 {
     // Obter o par (i,j) calculados na função acima (build_MatrixM_fgAndChosePairij)
     int i_index = pairIJ[0], j_index = pairIJ[1];
@@ -283,9 +283,8 @@ void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int
     }
     
     // Chamada de função para construir os N vectors e simular a comunicação com os servers
-    constructNVectors(D,K,i_index,L,N,symbols_subpacket,shuffle_random,messages,h,Gmatrix);
+    constructNVectors(D,K,i_index,L,N,symbols_subpacket,shuffle_random,messages,h,Gmatrix,q);
 }
-
 
 // Função para construir N vetores de tamanho K * L.
 // Estes vetores são gerados um algoritmo random, baseado no conjunto de mensagens de interesse (W), as regras são as seguintes:
@@ -294,7 +293,7 @@ void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int
 //        são os índices das K-D mensagens de interferência numa ordem crescente ou decrescente mas fixa.
 //      - Para cada 1 <= l <= L e 1 <= m <= D o vetor v(l-1)*D+m+1 é o coeficente correspondente à combinação linear Y(l-1)*D+m+1 definida como:
 //        Y(l-1)*D+m+1 := Y1 + gm * [Xw,l,...XwD,l] ^T onde gm é um vetor da Gmatrix calculada anteriormente e w1,...,wD são os índices das D mensagens de interesse, numa ordem crescente ou decrescente mas fixa.
-void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix)
+void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix, ZZ q)
 {
     // Definir vetor que vai conter todos os N vetores de tamanho K*L que correspondem aos coeficientes das combinações lineares calculadas a seguir
     std::vector<Eigen::VectorXi> n_vectors(N, Eigen::VectorXi::Zero(K * L));
@@ -451,5 +450,4 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
             std::cout << "\nPrint vector Zn" << j+1 << ": " << '\n';
             show_Vectorxi(Z_vectors[j], symbols_subpacket);
         }
-
 }

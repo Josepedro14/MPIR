@@ -51,7 +51,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
 // std::vector <int> pairIJ  ->  o par (i,j) calculado na função anterior e usado na construção dos dois elementos referidos acima.
 // std::vector<Message> &messages  ->  as mensangens já preenchidas pela 1º função definida neste ficheiro.
 // std::mt19937 shuffle_random  ->  usado para distribuir os elementos pertencentes a (Fq) de forma aleatória por 'h' e 'G'.
-void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages);
+void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages, ZZ q);
 
 
 
@@ -71,4 +71,4 @@ void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int
 // std::vector<Message> &messages  ->  as mensagens já preenchidas pela 1º função definida neste ficheiro.
 // Eigen::VectorXd h  ->  sparse-vector h calculado na função anterior, utilizado para o cálculo dos 'N' vetores das mensagens de interferência.
 // Eigen::MatrixXd Gmatrix  ->  matriz G também calculada na função anteiror, utilizado para o cálculo dos 'N' vetores das mensagens de interesse. 
-void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix);
+void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix, ZZ q);
