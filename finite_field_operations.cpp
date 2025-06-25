@@ -38,6 +38,18 @@ int mult_modFq (int a, int b)
     return conv<int>(res);
 }
 
+// Função que calcula o inverso multiplicativo de um dado número b
+// Retorna o resultado como um inteiro
+int inversomult_modFq(int b)
+{
+    // b != 0, pois 0 não tem inverso multiplicativo
+    ZZ_p b_ZZ = conv<ZZ_p>(b);
+
+    ZZ_p inv_b = inv(b_ZZ);
+
+    return conv<int>(inv_b);
+}
+
 
 // Função que faz a adição de dois vetores (Eigen::VectorXi) sobre Fq
 // Cada elemento do novo vetor (vec_res) é obtido através da adição sobre Fq de dois elementos um de vec1 e um de vec2

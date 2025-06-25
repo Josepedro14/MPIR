@@ -10,7 +10,7 @@ void chooseAleatoryPair (Eigen::MatrixXd &matrixProb, int K, int D, std::vector<
     // variável de controlo para escolha do par (i,j) consoante o 'random' gerado
     double sum = 0.0;
 
-     std::cout << "\nProbabilidade do número gerado: " << random << '\n';
+    //std::cout << "\nProbabilidade do número gerado: " << random << '\n';
 
     // Percorremos a matriz de probabilidades 
     for(int i = 0; i < (K-D) + 1; i++)

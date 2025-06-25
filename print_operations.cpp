@@ -40,6 +40,22 @@ void show_Matrix (Eigen::MatrixXd &matrix, int rows, int cols)
 }
 
 
+void show_Matrix_xi (Eigen::MatrixXi &matrix, int rows, int cols)
+{
+    std::cout << "Matriz :" << '\n';
+
+    for(int line = 0; line < rows; line++)
+    {
+        for(int col = 0; col < cols; col++)
+        {
+            std::cout << matrix(line,col) << " ";
+        }
+
+        std::cout << '\n';
+    }
+}
+
+
 
 void show_Vector (Eigen::VectorXd &vec, int size)
 {

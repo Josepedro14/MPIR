@@ -9,7 +9,6 @@
 //    m -> tamanho de cada mensagem ( m >= 2 e par)
 //    L -> Grau de Subpacketização (número de subpacotes)
 
-
 int main ()
 {
     int K = 4, N = 5, D = 2, m = 4;  
@@ -45,10 +44,10 @@ int main ()
     buildShuffle_Subpackets(messages, K, L, symbols_subpacket, shuffle_random);
 
     pairIJ = build_MatrixM_fgAndChosePairij(matrix_M, K, D, L, maxVal);
-    std::cout << "\nPrint index i value: " << pairIJ[0] << '\n';
-    std::cout << "\nPrint index j value: " << pairIJ[1] << '\n';
+    //std::cout << "\nPrint index i value: " << pairIJ[0] << '\n';
+    //std::cout << "\nPrint index j value: " << pairIJ[1] << '\n';
 
-    buildSparseVectorHAndG(pairIJ, D, K, L, N, symbols_subpacket, shuffle_random, messages, q);    
+    buildSparseVectorHAndG(pairIJ, D, K, L, N, symbols_subpacket, shuffle_random, messages);    
 
     return 0;    
 }

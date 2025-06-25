@@ -1,5 +1,4 @@
 #include "mpir_functions.h"
-#include "finite_field_operations.h"
 
 // Função que preenche os subpackets das mensagens com (symbols_subpacket) elementos.
 void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int symbols_subpacket, std::mt19937 shuffle_random)
@@ -73,10 +72,10 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
         colVec1s(line) = 1.0;
     }
 
-    std::cout << "\nPrint Matriz M: " << '\n';
-    show_Matrix(matrix_M,D,D);
-    std::cout << '\n';
-    show_Vector(colVec1s,D);
+    //std::cout << "\nPrint Matriz M: " << '\n';
+    //show_Matrix(matrix_M,D,D);
+    //std::cout << '\n';
+    //show_Vector(colVec1s,D);
 
     // Agora iremos calcular as funções fT e gT definidas no documento na página 2, elementos (2) e (3) respetivamente
     // M ^ (K-D)
@@ -90,10 +89,10 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
     // gT = 1^T * (M+I) ^(K-D)
     Eigen::VectorXd gT = colVec1s.transpose() * matrixKminusDWthI;
 
-    std::cout << "\nPrint fT vector: " << '\n';
-    show_Vector(fT,D);
-    std::cout << "\nPrint gT vector: " << '\n';
-    show_Vector(gT,D);
+    //std::cout << "\nPrint fT vector: " << '\n';
+    //show_Vector(fT,D);
+    //std::cout << "\nPrint gT vector: " << '\n';
+    //show_Vector(gT,D);
 
     // Aqui vamos tentar descobrir qual o valor do índice j* este será o índice j pertencente a [D] que maximiza fj/gj calculados anteriormente.
     int indexJ = -1;
@@ -112,7 +111,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
         }
     }
 
-    std::cout << "\nPrint index j*: " << indexJ << " e o maxValfDIVg para esse j* é: " << maxValfDIVg << '\n';
+    //std::cout << "\nPrint index j*: " << indexJ << " e o maxValfDIVg para esse j* é: " << maxValfDIVg << '\n';
 
     // Para as probabilidades e possíveis pares (i,j) no exemplo ilustrativo temos -> (0,1);(0,2);(1,1);(1,2);(2,1);(2,2)
     Eigen::VectorXd probabilitiesPjD (D);
@@ -137,11 +136,11 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
         matrixProb((K-D),i) = probabilitiesPjD(i);
     }
 
-    std::cout << "\nMostrar probabilidades PK-D,i: " << '\n';
-    show_Vector(probabilitiesPjD,D);
+    //std::cout << "\nMostrar probabilidades PK-D,i: " << '\n';
+    //show_Vector(probabilitiesPjD,D);
 
-    std::cout << "\nMostrar Matriz Probabilidades pós PK-D,i: " << '\n';
-    show_Matrix(matrixProb,(K-D) + 1, D);
+    //std::cout << "\nMostrar Matriz Probabilidades pós PK-D,i: " << '\n';
+    //show_Matrix(matrixProb,(K-D) + 1, D);
 
 
     // Probabilidades Pi,D onde 0 <= i <= K-D-1
@@ -161,14 +160,14 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
             matrixProb(i,j) = probabilitiesPiD(j);
         }
 
-            std::cout << "\nMostrar probabilidades Pi,D na iteração i = " << i << '\n';
-            show_Vector(probabilitiesPiD,D);
+            //std::cout << "\nMostrar probabilidades Pi,D na iteração i = " << i << '\n';
+            //show_Vector(probabilitiesPiD,D);
 
-            std::cout << "\nMostrar Matriz Probabilidades fim na iteração i = " << i << '\n';
-            show_Matrix(matrixProb,(K-D) + 1, D);
+            //std::cout << "\nMostrar Matriz Probabilidades fim na iteração i = " << i << '\n';
+            //show_Matrix(matrixProb,(K-D) + 1, D);
     }
 
-     std::cout << "\nSoma de todas as probabilidades da Matriz: " << matrixProb.sum() << '\n'; 
+     //std::cout << "\nSoma de todas as probabilidades da Matriz: " << matrixProb.sum() << '\n'; 
 
     // Define vetor que conterá o par obtido pelas probabilidades e em que os seus 2 elementos estão dispostos pela ordem i,j
     std::vector <int> pairValues;
@@ -185,7 +184,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
 // Regras da matriz G são as seguintes:
 //     i) O vetor g1 possui exatamente j entradas não nulas em posições random
 //     ii) Para cada 2 <= m <= D, as posições das entradas diferentes de 0 no vetor gm são uma rotação circular das posições das entradas não nulas do vetor gm-1 (o anterior)
-void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random,std::vector<Message> &messages, ZZ q)
+void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random,std::vector<Message> &messages)
 {
     // Obter o par (i,j) calculados na função acima (build_MatrixM_fgAndChosePairij)
     int i_index = pairIJ[0], j_index = pairIJ[1];
@@ -205,8 +204,8 @@ void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int
     // Dar shuffle no array de índices para depois colocar os elementos de forma aleatória
     std::shuffle(h_index.begin(), h_index.end(), shuffle_random);
 
-    std::cout << "\nMostrar vetor de índices baralhado h: " << '\n';
-    show_Vectorxi(h_index, K-D);
+    //std::cout << "\nMostrar vetor de índices baralhado h: " << '\n';
+    //show_Vectorxi(h_index, K-D);
 
     // Preencher o i-sparse vector h com i elementos do finite field de ordem q (nums_ToFill_I == i)
     for(int j = 0; j < nums_ToFill_I; j++)
@@ -245,8 +244,8 @@ void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int
         // Dar shuffle no array de índices para inserirmos os números gerados por Fq em posições aleatórias
         std::shuffle(g1_index.begin(),g1_index.end(),shuffle_random);
 
-        std::cout << "\nMostrar vetor de índices baralhado g1: " << '\n';
-        show_Vectorxi(g1_index, D);
+        //std::cout << "\nMostrar vetor de índices baralhado g1: " << '\n';
+        //show_Vectorxi(g1_index, D);
 
         // Preencher o vector g1 pertencente á matrix G com j elementos do finite field de ordem q (nums_ToFill_J == j)
         for(int k = 0; k < nums_ToFill_J; k++)
@@ -272,10 +271,16 @@ void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int
         std::cout << "\nPrint Gmatrix: " << '\n';
         show_Matrix(Gmatrix,D,D);
 
-        std::cout << "\nPrint determinante Gmatrix: " << Gmatrix.determinant() << '\n';
+        // Criar Gmatrix com valores inteiros para calcular o determinante
+        Eigen::MatrixXi Gmatrix_i = Gmatrix.cast<int>();
 
-        // Se o determinante da matriz G for maior que 0 então a matriz é invertível e podemos avançar caso contrário repetimos o processo de gerar a matriz G (Gmatrix)
-        if(Gmatrix.determinant() != 0)
+        // Chamada de função para calcular o determinante da matriz de forma recursiva segundo o teorema de Laplace
+        int det = calculateDetrec(Gmatrix_i,D);
+
+        std::cout << "\nPrint determinante Gmatrix: " << det << '\n';
+
+        // Se o determinante for diferente de 0 podemos avançar caso contrário calculamos de novo
+        if(det != 0)
         {
             break;
         }
@@ -283,7 +288,7 @@ void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int
     }
     
     // Chamada de função para construir os N vectors e simular a comunicação com os servers
-    constructNVectors(D,K,i_index,L,N,symbols_subpacket,shuffle_random,messages,h,Gmatrix,q);
+    constructNVectors(D,K,i_index,L,N,symbols_subpacket,shuffle_random,messages,h,Gmatrix);
 }
 
 // Função para construir N vetores de tamanho K * L.
@@ -293,7 +298,7 @@ void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int
 //        são os índices das K-D mensagens de interferência numa ordem crescente ou decrescente mas fixa.
 //      - Para cada 1 <= l <= L e 1 <= m <= D o vetor v(l-1)*D+m+1 é o coeficente correspondente à combinação linear Y(l-1)*D+m+1 definida como:
 //        Y(l-1)*D+m+1 := Y1 + gm * [Xw,l,...XwD,l] ^T onde gm é um vetor da Gmatrix calculada anteriormente e w1,...,wD são os índices das D mensagens de interesse, numa ordem crescente ou decrescente mas fixa.
-void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix, ZZ q)
+void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_subpacket, std::mt19937 shuffle_random, std::vector<Message> &messages,Eigen::VectorXd h,Eigen::MatrixXd Gmatrix)
 {
     // Definir vetor que vai conter todos os N vetores de tamanho K*L que correspondem aos coeficientes das combinações lineares calculadas a seguir
     std::vector<Eigen::VectorXi> n_vectors(N, Eigen::VectorXi::Zero(K * L));
@@ -379,7 +384,7 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
                 // Aqui estamos a ir buscar o vetor gm à Gmatrix para depois usarmos na multiplicação
                 for(int j = 0; j < D; j++)
                 {
-                    gm(j) = (int) Gmatrix(m, j);
+                    gm(j) = (int)Gmatrix(m, j);
                 }
 
                 // Percorremos as mensagens de interesse para cada uma vamos buscar o subpacote correspondente (o atual l), multiplicamos pelo elemento do vetor gm e adicionamos ao Y atual que é dado pela fórmula (l-1)*D+m+1
@@ -443,11 +448,56 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
             Z_vectors.push_back(Zvec);
         } 
 
-
         // Print Zn's
         for(int j = 0; j < N-1; j++)
         {
             std::cout << "\nPrint vector Zn" << j+1 << ": " << '\n';
             show_Vectorxi(Z_vectors[j], symbols_subpacket);
         }
-}
+
+        
+        Eigen::MatrixXi A (symbols_subpacket * D, symbols_subpacket * L + 1);
+
+        for(int i = 0; i < symbols_subpacket * D; i++)
+        {
+            for(int j = 0; j < symbols_subpacket * L; j++)
+            {
+                A(i,j) = n_vectors[i+1](j);
+            }
+        }
+
+        Eigen::VectorXi vecAux (N * symbols_subpacket);
+        int idx = 0;
+        for(int i = 0; i < N-1; i++)
+        {
+            for(int j = 0; j < symbols_subpacket; j++)
+            {
+                vecAux(idx) = Z_vectors[i](j);
+                idx++;
+            }
+        }
+
+        for(int i = 0; i < symbols_subpacket * D; i++)
+        {
+            A(i,symbols_subpacket * L) = vecAux(i);
+        }
+
+        for (int col = 0; col < 4; col++) {
+            std::swap(A(1, col), A(2, col));
+        }
+
+        calculateSubpacketsGauss(A, symbols_subpacket * D, symbols_subpacket * L + 1,L,D,K,symbols_subpacket);
+        
+        int startIdx = symbols_subpacket * D;  
+        int rows = symbols_subpacket * D;      
+
+        int index2 = 0;
+        for(int i = startIdx; i < vecAux.size(); i++)
+        {
+            if(index2 >= rows) break;  
+            A(index2, symbols_subpacket * L) = vecAux(i);
+            index2++;
+        }
+
+        calculateSubpacketsGauss(A, symbols_subpacket * D, symbols_subpacket * L + 1, L, D, K, symbols_subpacket);
+}   
