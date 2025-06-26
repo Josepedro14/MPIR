@@ -89,7 +89,7 @@ void serverAnswer(int K, Set particao_aleatoria[], std::vector<ZZ> &answers, std
     {
         int val1 = conv<int>(database_messages[particao_aleatoria[i].values[0]]);
         int val2 = conv<int>(database_messages[particao_aleatoria[i].values[1]]);
-       answers[i] = conv<ZZ>(applyXOR(val1,val2));
+        answers[i] = conv<ZZ>(applyXOR(val1,val2));
     }
 }
 
