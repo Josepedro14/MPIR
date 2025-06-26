@@ -39,7 +39,7 @@ int sub_modFq (int a, int b);
 int mult_modFq (int a, int b);
 
 
-// Inverso multiplicativo em aritmética modular para um dado Finite Field de ordem q
+// Inverso em aritmética modular para um dado Finite Field de ordem q
 //
 //  Esta operação é utilizada para realizar a divisão em finite fields (Fq)
 //  Dividir a por b em Fq (a / b mod q) é equivalente a fazer a x b^-1 mod q.
@@ -50,7 +50,7 @@ int mult_modFq (int a, int b);
 //  Testando b^-1 = 4, vemos que:  2 * 4 mod 7 = 1 mod 7 ≡ 8 mod 7 = 1 mod 7 ≡ 1 = 1, logo b^-1 = 4 e dividir por 2 em Fq é o mesmo que multiplicar por 4.
 //
 //  Onde 'mod' representa o resto da divisão inteira e se considera que b != 0
-int inversomult_modFq(int b);
+int inverso_modFq(int b);
 
 
 // Adição em Fq para vetores Eigen::VectorXi

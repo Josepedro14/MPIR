@@ -38,11 +38,11 @@ int mult_modFq (int a, int b)
     return conv<int>(res);
 }
 
-// Função que calcula o inverso multiplicativo de um dado número b
+// Função que calcula o inverso de um dado número b
 // Retorna o resultado como um inteiro
-int inversomult_modFq(int b)
+int inverso_modFq(int b)
 {
-    // b != 0, pois 0 não tem inverso multiplicativo
+    // b != 0, pois 0 não tem inverso 
     ZZ_p b_ZZ = conv<ZZ_p>(b);
 
     ZZ_p inv_b = inv(b_ZZ);

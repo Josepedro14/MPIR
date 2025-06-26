@@ -131,7 +131,7 @@ void calculateSubpacketsGauss (Eigen::MatrixXi A, int rows, int cols, int L, int
         {
             if(A(j,i) != 0)
             {
-                int inverse_pivoFq = inversomult_modFq(pivo);
+                int inverse_pivoFq = inverso_modFq(pivo);
                 std::cout << "\nPrint inverso: " << inverse_pivoFq << '\n';
                 int scalar = mult_modFq(A(j,i), inverse_pivoFq);
                 std::cout << "\nPrint scalar: " << scalar << '\n';
@@ -167,7 +167,7 @@ void calculateSubpacketsGauss (Eigen::MatrixXi A, int rows, int cols, int L, int
 
         if (pivot != 0)
         {
-            int inv = inversomult_modFq(pivot);
+            int inv = inverso_modFq(pivot);
             solution[i] = mult_modFq(rhs, inv);
         }
  
