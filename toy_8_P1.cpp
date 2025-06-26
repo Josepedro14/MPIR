@@ -1,150 +1,156 @@
-
-/*
-- Um servidor remoto 
-- Uma base de dados (composta por um número par de mensagens binárias de igual comprimento representadas por: X1,...,Xk)
-- O utilizador deseja descarregar uma mensagem do servidor (Objetivo: não revelar a mensagem desejada ao servidor)
-- O utilizador possui uma mensagem Xs (1 <= s <= K) como informação lateral escolhida aleatoriamente entre as outras K mensagens e desconhecida pelo servidor
-- Seja Xw a mensagem que o utilizador deseja e Xs a mensagem que possui com W,S ∈ {1,...,K} e W ≠ S. 
-
-- Toy Example --> [8] Private Information Retrieval With Side Information The Single Server Case 
-( Exemplo 1: Esquema PIR de Partição e Codificação )
-*/
-
 #include <iostream>
 #include <vector>
-#include <bitset>
+#include <random>
+#include <algorithm>
+#include <NTL/ZZ.h>
 
-// Conjuntos de tamanho 2 da partição aleatória
+using namespace NTL;
+
+// Estrutura que representa um conjunto e contém:
+//  Índices das mensagens da base de dados
+//  Informação sobre a presença do índice da mensagem a recuperar
 struct Set
 {
-    int values [2];                                      
+    int values [2];
+    bool hasindexW = false;                                      
 };                                                            
 
-// Estrutura das mensagens presentes na base de dados
-struct Message
-{
-    int value;
-    bool posChanged;
-};
 
-std::vector<Message> messages= {{0b00000001 , false}, {0b00000010, false}, {0b00000011 , false}, {0b00000100 , false}, {0b00000101, false}, {0b00000110, false}, {0b00000111, false}, {0b00001000, false}};
-
-// Função para aplicar o XOR nos elementos dos conjuntos na resposta do servidor
+// Função para aplicar o XOR nos conjuntos das partições, na resposta do servidor
 int applyXOR (int message1, int message2)
 {
     return message1 ^ message2;
 }
 
-void build_Particao (int K,int W,int S, Set particao_aleatoria[])
+
+// Função para dar print às partições criadas
+void print_partition (Set particao_aleatoria[], int K)
 {
-    // Retirar a mensagem desejada e a informação lateral do conjunto de mensagens para formar um par, e eliminá-las do conjunto de mensagens
-    int desired_message = messages[W - 1].value;
-    int known_message = messages[S - 1].value;
-
-    if(W > S)
+    std::cout << '\n';
+    for(int i = 0; i < K/2; i++)
     {
-        messages.erase(messages.begin() + (W - 1));
-        messages.erase(messages.begin() + (S - 1));
+        std::cout << "Print partition " << i+1 << " Values: " << particao_aleatoria[i].values[0] << " " << particao_aleatoria[i].values[1] << '\n';
     }
+}
 
-    else 
+// Função principal que constrói a partição para os K/2 conjuntos
+void build_Partition(int K, int W, int S, Set particao_aleatoria[], std::mt19937 shuffle_random)
+{
+    // vetor que contém os índices das mensagens presentes na BD, exceto o da mensagem a recuperar e da informação lateral
+    std::vector<int> msg_indexs;
+
+    // Preenche-lo com índices exceto W e S
+    for(int i = 0; i < K; i++)
     {
-        messages.erase(messages.begin() + (S - 1));
-        messages.erase(messages.begin() + (W - 1));
-    }
-    
-
-    int n_size = K - 2;
-    // Inicializar um novo array sem as duas mensagens anteriormente retiradas
-    std::vector<int> aleatory_messages(n_size);
-
-    // Inicializar o gerador de números aleatórios sendo a semente o tempo atual em segundos
-    srand(time(NULL));
-
-    int num = 0;
-
-    // Dispor aleatoriamente os elementos das mensagens no novo array criado para depois formarmos os conjuntos
-    while(n_size > 0)
-    {
-        int random_index = rand() % (K - 2);
-
-        //std::cout << "Random index " << random_index << '\n';
-
-        if(!messages[random_index].posChanged)
+        if(i != W && i != S)
         {
-            aleatory_messages[random_index] = messages[num].value;
-
-            //std::cout << messages[random_index].value << " to pos " << random_index << '\n';
-            
-            messages[random_index].posChanged = true;
-            num += 1;
-            n_size -= 1;
-            
+            msg_indexs.push_back(i);
         }
     }
 
+    // Baralhar as posições dos índices para criar aleatoridade na junção de elementos num conjunto
+    std::shuffle(msg_indexs.begin(),msg_indexs.end(),shuffle_random);
 
-    // Formar os conjuntos
+    // Definir conjunto que vai conter o índice da mensagem desejada e da informação lateral
+    Set pairWS;
+    // campo do conjunto usado para controlar a presença do índice W
+    pairWS.hasindexW = true;
+    pairWS.values[0] = W;
+    pairWS.values[1] = S;
+
+    // Dispor de forma aleatória o conjunto criado na partição e preencher os restantes conjuntos com elementos do vetor de índices de forma aleatória
     int index = 0;
-    int random_set_index = rand() % (K/2);
-
-    for(int j = 0; j < K/2; j++)
+    int random_index = conv<int>(RandomBnd((ZZ) (K/2)));
+    for(int j = 0; j < (K/2); j++)
     {
-        if(j == random_set_index)
+        if(j == random_index)
         {
-            particao_aleatoria[j].values[0] = desired_message;
-            particao_aleatoria[j].values[1] = known_message;
+            particao_aleatoria[j] = pairWS;
         }
 
         else 
         {
-            particao_aleatoria[j].values[0] = aleatory_messages[(2 * index)];
-            particao_aleatoria[j].values[1] = aleatory_messages[(2 * index) + 1];
-            index += 1;
+            particao_aleatoria[j].values[0] = msg_indexs[(2*index)];
+            particao_aleatoria[j].values[1] = msg_indexs[(2*index) + 1];
+            index++;
         }
     }
 
-    
-    // Ver conjuntos Criados
-    
-    /*
-
-    for (int k = 0; k < K/2; k++)
-    {
-        std::cout  << k + 1 << "  -->  " << particao_aleatoria[k].values[0] << "," << particao_aleatoria[k].values[1] << "\n";
-    }
-        
-    */
-    
-
-
+    // Chamar função para printar a partição
+    print_partition(particao_aleatoria,K);
 }
 
-void serverResponse (int K, Set particao_aleatoria[])
+
+// Função que devolve as respostas do server ao utilizador
+// Para cada conjunto/par calcula o XOR das duas mensagens binárias na base de dados segundo os respetivos índices presentes no conjunto
+void serverAnswer(int K, Set particao_aleatoria[], std::vector<ZZ> &answers, std::vector<ZZ> database_messages)
 {
-    for(int i = 0; i < K/2; i++)
+    for(int i = 0; i < (K/2); i++)
     {
-        int xOR_set_res = applyXOR(particao_aleatoria[i].values[0], particao_aleatoria[i].values[1]);
-        std::cout << "Server response " << i + 1 << ": " << std::bitset<8>(xOR_set_res) << '\n';
+        int val1 = conv<int>(database_messages[particao_aleatoria[i].values[0]]);
+        int val2 = conv<int>(database_messages[particao_aleatoria[i].values[1]]);
+        answers[i] = applyXOR(val1,val2);
     }
 }
+
+
+// Função que recupera a mensagem pela resposta do servidor
+// Verificamos com o campo hasindexW da estrutura Set se o conjunto atual contém o índice da mensagem desejada
+// Se sim aplicamos o XOR à correspondente resposta do server e à informação lateral que possuímos
+void recoverMsgAnswer (int K, int W, int S, Set particao_aleatoria [], std::vector<ZZ> answers, std::vector<ZZ> database_messages)
+{
+
+    for(int i = 0; i < (K/2); i++)
+    {
+        if(particao_aleatoria[i].hasindexW)
+        {
+           int answer = conv<int>(answers[i]);
+           int XS = conv<int>(database_messages[S]); 
+           int XW = applyXOR(answer,XS);
+
+           std::cout << "\nValue from database " << conv<ZZ>(XW) << '\n';
+           break;
+        }
+    }
+}
+
 
 int main ()
 {
     /*
-        K --> Representa o número de mensagens na base de dados
-        W --> Representa a mensagem desejada pelo utilizador
-        S --> Representa a mensagem (informação lateral) que o utilizador já possui e o servidor desconhece
+        Um servidor
+        K --> Representa o número de mensagens na base de dados (> 0 e par)
+        W --> Representa o índice da mensagem desejada pelo utilizador
+        S --> Representa o índice da mensagem (informação lateral) que o utilizador já possui (W != S)
     */
     int K = 8, W = 2, S = 4;
     Set particao_aleatoria [(K/2)];
+    int size_bits = 4;
 
-    build_Particao(K,W,S,particao_aleatoria);
-    
-    serverResponse(K,particao_aleatoria);
+    std::vector<ZZ> database_messages (K);
+    std::vector<ZZ> answers (K/2);
 
-    // Para ver o conteúdo da mensagem desejada basta fazermos XOR das respostas com a mensagem que já possuíamos e ver qual resultado é a mensagem desejada.
+    // Preencher as K mensagens da base de dados com valores em binário aleatórios
+    for(int i = 0; i < K; i++)
+    {
+        database_messages[i] = RandomBits_ZZ(size_bits);
+        std::cout << "\nMessage " << i+1 << ": " << database_messages[i] << '\n';
+    }
 
+    std::random_device rd;
+    std::mt19937 shuffle_random(rd());
+
+    build_Partition(K,W,S,particao_aleatoria,shuffle_random);
+    serverAnswer(K,particao_aleatoria,answers,database_messages);
+
+    // Dar print às respostas do servidor 
+    std::cout << "\nResponse from server: " << '\n';
+    for(size_t i = 0; i < answers.size(); i++)
+    {
+        std::cout << answers[i] << '\n';
+    }
+
+    recoverMsgAnswer(K,W,S,particao_aleatoria,answers,database_messages);
 
     return 0;
 }

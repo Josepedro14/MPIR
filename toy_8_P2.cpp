@@ -301,6 +301,7 @@
             if(aleatory_Partition[i].hasindexW)
             {
                 idxP = i;
+                break;
             }
         }
 
@@ -333,7 +334,7 @@
 
     int main ()
     {
-        int K = 12,M = 2, W = 2, g;
+        int K = 8,M = 2, W = 2, g;
         std::vector<int> S = {4,6};
         bool isSpecialCase = false;
         ZZ maxVal = conv<ZZ>(10000);
