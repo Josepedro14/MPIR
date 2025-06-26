@@ -4,7 +4,6 @@
     #include <random>
     #include <NTL/ZZ.h>
     #include <algorithm>
-    #include <NTL/ZZ_p.h>
 
     using namespace NTL;
 
