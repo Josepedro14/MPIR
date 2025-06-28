@@ -275,7 +275,8 @@ void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int
         Eigen::MatrixXi Gmatrix_i = Gmatrix.cast<int>();
 
         // Chamada de função para calcular o determinante da matriz de forma recursiva segundo o teorema de Laplace
-        int det = calculateDetrec(Gmatrix_i,D);
+        int det = 1;
+        calculateMatrixGauss(Gmatrix_i,D,D,det,false);
 
         std::cout << "\nPrint determinante Gmatrix: " << det << '\n';
 
@@ -455,43 +456,29 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
             show_Vectorxi(Z_vectors[j], symbols_subpacket);
         }
 
-        
-        
-        Eigen::MatrixXi A (N-1, symbols_subpacket * D + 1);
+
+        Eigen::MatrixXi A (N-1, L * D + 1);
+        Eigen::VectorXi vecAux (N * symbols_subpacket);
+        int detA;
 
         for(int i = 0; i < N-1; i++)
         {
-            for(int j = 0; j < symbols_subpacket * D; j++)
+            for(int j = 0; j < L * D; j++)
             {
                 A(i,j) = n_vectors[i+1](j);
             }
         }
 
-        Eigen::VectorXi vecAux (N * symbols_subpacket);
-        int idx = 0;
+    for (int i = 0; i < symbols_subpacket; i++) {
 
-        for (int j = 0; j < symbols_subpacket; ++j) {
-            for (int i = 0; i < N-1; ++i) {
-                
-                vecAux(idx) = Z_vectors[i](j);
-                idx++;
-            }
+        for (int j = 0; j < N - 1; j++) {
+            
+            A(j, L * D) = Z_vectors[j](i);
+
         }
 
-       for (int i = 0; i < symbols_subpacket; i++) {
-            int startIdx = i * (N-1);
+        std::cout << "\nPrint matriz A: \n" << A << "\n";
 
-            for (int j = 0; j < (N-1); j++) {
-                    
-                int idx = startIdx + j;
-                
-                if (idx < vecAux.size()) {
-                     A(j, symbols_subpacket * D) = vecAux(idx);
-                } 
-            }
-
-            calculateSubpacketsGauss(A, N - 1, symbols_subpacket * D + 1);
-        }
-
-        
+        calculateMatrixGauss(A, N - 1, L * D + 1, detA, true);   
+    }
 }   
