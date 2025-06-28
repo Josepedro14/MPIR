@@ -103,7 +103,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
     {   
         double val = (double) (fT(j) / gT(j));
 
-        // Se a sua divisão for maior então atualizamos o valor e o novo índice j
+        // Se a sua divisão for maior então atualizamos o valor e o novo índice j*
         if(val > maxValfDIVg)
         {
             maxValfDIVg = val;
@@ -343,12 +343,12 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
             }
         }
         
-        std::cout << "\nPrint interference messages (subpacket 1) messages (K-D...K): " << '\n';
-        show_SubpacketsVectorXi(interference_messages,interference_messages.size(),symbols_subpacket);
-        std::cout << '\n';
-        std::cout << "\nPrint demand messages (subpacket 0...L) messages (0...D): " << '\n';
-        show_SubpacketsVectorXi(demand_messages,demand_messages.size(),symbols_subpacket);
-        std::cout << '\n';
+        //std::cout << "\nPrint interference messages (subpacket 1) messages (K-D...K): " << '\n';
+        //show_SubpacketsVectorXi(interference_messages,interference_messages.size(),symbols_subpacket);
+        //std::cout << '\n';
+        //std::cout << "\nPrint demand messages (subpacket 0...L) messages (0...D): " << '\n';
+        //show_SubpacketsVectorXi(demand_messages,demand_messages.size(),symbols_subpacket);
+        //std::cout << '\n';
 
         // Calcular o vetor Y1 que vai servir para esconder as inteções do utilizador uma vez que é construído com os elementos das mensagens que não lhe interessam (mensagens de interferência)
         // Utilizamos as funções de adição de vetores e multiplicação de vetor por um escalar sobre Fq definidas no ficheiro (finite_field_operations.cpp)
@@ -456,11 +456,12 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
         }
 
         
-        Eigen::MatrixXi A (symbols_subpacket * D, symbols_subpacket * L + 1);
+        
+        Eigen::MatrixXi A (N-1, symbols_subpacket * D + 1);
 
-        for(int i = 0; i < symbols_subpacket * D; i++)
+        for(int i = 0; i < N-1; i++)
         {
-            for(int j = 0; j < symbols_subpacket * L; j++)
+            for(int j = 0; j < symbols_subpacket * D; j++)
             {
                 A(i,j) = n_vectors[i+1](j);
             }
@@ -468,36 +469,29 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
 
         Eigen::VectorXi vecAux (N * symbols_subpacket);
         int idx = 0;
-        for(int i = 0; i < N-1; i++)
-        {
-            for(int j = 0; j < symbols_subpacket; j++)
-            {
+
+        for (int j = 0; j < symbols_subpacket; ++j) {
+            for (int i = 0; i < N-1; ++i) {
+                
                 vecAux(idx) = Z_vectors[i](j);
                 idx++;
             }
         }
 
-        for(int i = 0; i < symbols_subpacket * D; i++)
-        {
-            A(i,symbols_subpacket * L) = vecAux(i);
+       for (int i = 0; i < symbols_subpacket; i++) {
+            int startIdx = i * (N-1);
+
+            for (int j = 0; j < (N-1); j++) {
+                    
+                int idx = startIdx + j;
+                
+                if (idx < vecAux.size()) {
+                     A(j, symbols_subpacket * D) = vecAux(idx);
+                } 
+            }
+
+            calculateSubpacketsGauss(A, N - 1, symbols_subpacket * D + 1);
         }
 
-        for (int col = 0; col < 4; col++) {
-            std::swap(A(1, col), A(2, col));
-        }
-
-        calculateSubpacketsGauss(A, symbols_subpacket * D, symbols_subpacket * L + 1,L,D,K,symbols_subpacket);
         
-        int startIdx = symbols_subpacket * D;  
-        int rows = symbols_subpacket * D;      
-
-        int index2 = 0;
-        for(int i = startIdx; i < vecAux.size(); i++)
-        {
-            if(index2 >= rows) break;  
-            A(index2, symbols_subpacket * L) = vecAux(i);
-            index2++;
-        }
-
-        calculateSubpacketsGauss(A, symbols_subpacket * D, symbols_subpacket * L + 1, L, D, K, symbols_subpacket);
 }   

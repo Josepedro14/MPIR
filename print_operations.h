@@ -14,8 +14,6 @@ void show_MessagesSubpackets (std::vector <Message> &messages, int K, int L, int
 // Recebe como parâmetros a matriz (matrix) e as suas dimensões linhas (rows) e colunas (cols).
 void show_Matrix (Eigen::MatrixXd &matrix, int rows, int cols);
 
-void show_Matrix_xi (Eigen::MatrixXi &matrix, int rows, int cols);
-
 // Função para mostrar um vetor com valores 'double' (Eigen::VectorXd).
 // Recebe como parâmetros o vetor (vec) e o seu tamanho (size).
 void show_Vector (Eigen::VectorXd &vec, int size);

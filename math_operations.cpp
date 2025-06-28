@@ -102,7 +102,7 @@ int calculateDetrec (Eigen::MatrixXi Gmatrix, int D)
 }
 
 // Função que resolve um sistema de equações lineares utilizando o método de eliminação de Gauss
-void calculateSubpacketsGauss (Eigen::MatrixXi A, int rows, int cols, int L, int D, int K, int symbols_subpacket)
+void calculateSubpacketsGauss (Eigen::MatrixXi A, int rows, int cols)
 {   
     std::cout << "\nPrint matriz inicio: " << '\n';
     show_Matrix_xi(A,rows,cols);
@@ -116,8 +116,6 @@ void calculateSubpacketsGauss (Eigen::MatrixXi A, int rows, int cols, int L, int
                 if(A(j,i) != 0)
                 {
                     A.row(i).swap(A.row(j));
-                    std::cout << "\nPrint A pos Swap: " << '\n';
-                    show_Matrix_xi(A,rows,cols);
                     break;
                 }
 
@@ -132,23 +130,16 @@ void calculateSubpacketsGauss (Eigen::MatrixXi A, int rows, int cols, int L, int
             if(A(j,i) != 0)
             {
                 int inverse_pivoFq = inverso_modFq(pivo);
-                std::cout << "\nPrint inverso: " << inverse_pivoFq << '\n';
                 int scalar = mult_modFq(A(j,i), inverse_pivoFq);
-                std::cout << "\nPrint scalar: " << scalar << '\n';
 
                 for(int k = 0; k < cols; k++)
                 {
                     A(j,k) = sub_modFq(A(j,k), mult_modFq(scalar, A(i,k)));
                 }
-
-                std::cout << "\nPrint matrix pos mult escalar: " << '\n';
-                show_Matrix_xi(A,rows,cols);
             }
         }
     }
- 
-    std::cout << "\nPrint matrix fim: " << '\n';
-    show_Matrix_xi(A,rows,cols);
+
 
 
     std::vector<int> solution(cols - 1, 0); 

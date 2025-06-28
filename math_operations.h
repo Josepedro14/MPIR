@@ -55,4 +55,4 @@ int calculateDetrec (Eigen::MatrixXi Gmatrix, int D);
 
 
 
-void calculateSubpacketsGauss (Eigen::MatrixXi A, int rows, int cols, int L, int D, int K, int symbols_subpacket);
+void calculateSubpacketsGauss (Eigen::MatrixXi A, int rows, int cols);
