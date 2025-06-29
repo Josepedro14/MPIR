@@ -70,7 +70,7 @@ Eigen::VectorXi addVectorsFq (Eigen::VectorXi vec1, Eigen::VectorXi vec2)
 
 // Função que faz a multiplicação de um escalar por um vetor (Eigen::VectorXi) sobre Fq (o escalar pertence a Fq)
 // Cada elemento do novo vetor (vec_res) é obtido através da multiplicação sobre Fq entre o escalar e o elemento vec1(i) 
-Eigen::VectorXi multVectorXVal (Eigen::VectorXi vec1, int val)
+Eigen::VectorXi multVectorXValFq (Eigen::VectorXi vec1, int val)
 {
     Eigen::VectorXi vec_res(vec1.size());
 

@@ -36,4 +36,4 @@ void show_SubpacketsVectorXi (std::vector<Eigen::VectorXi> messages, size_t size
 // L -> Grau de Subpacketização
 // K -> Número de mensangens em cada servidor
 // symbols_subpacket -> número de elementos por subpacote
-void show_QuerysAndAnswersServer (std::vector <int> &server_indexs, std::vector <Eigen::VectorXi> &n_vectors, std::vector <Eigen::VectorXi> &Y_vectors, int N, int L, int K, int symbols_subpacket);
+void show_QuerysAndAnswersServer (std::vector <int> &nvec_indexs, std::vector <Eigen::VectorXi> &n_vectors, std::vector <Eigen::VectorXi> &Y_vectors, int N, int L, int K, int symbols_subpacket);

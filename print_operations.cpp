@@ -96,18 +96,18 @@ void show_SubpacketsVectorXi (std::vector <Eigen::VectorXi> messages, size_t siz
 
 
 
-void show_QuerysAndAnswersServer (std::vector <int> &server_indexs, std::vector <Eigen::VectorXi> &n_vectors, std::vector <Eigen::VectorXi> &Y_vectors, int N, int L, int K, int symbols_subpacket)
+void show_QuerysAndAnswersServer (std::vector <int> &nvec_indexs, std::vector <Eigen::VectorXi> &n_vectors, std::vector <Eigen::VectorXi> &Y_vectors, int N, int L, int K, int symbols_subpacket)
 {
     // Print comunicações com os servers
     for(int i = 0; i < N; i++)
     {
         std::cout << "\n--------------------------------------------------------- SERVER " << i+1 << " ---------------------------------------------------------\n";
-        // Aqui estamos a enviar para o server indicado o vetor vn como o Query (Qn^[W]) ao server (n -> server_indexs[i])
+        // Aqui estamos a enviar para o server indicado o vetor vn como o Query (Qn^[W]) ao server (n -> nvec_indexs[i])
         std::cout << "\nQuerry: " << '\n';
-        show_Vectorxi(n_vectors[server_indexs[i]], K*L);
-        // Aqui o server (n -> server_indexs[i]) vai devolver/calcular uma Answer (An^[W]) que é a combinação linear Yn para o vetor vn recebido
+        show_Vectorxi(n_vectors[nvec_indexs[i]], K*L);
+        // Aqui o server (n -> nvec_indexs[i]) vai devolver/calcular uma Answer (An^[W]) que é a combinação linear Yn para o vetor vn recebido
         std::cout << "\nAnswer: " << '\n';
-        show_Vectorxi(Y_vectors[server_indexs[i]], symbols_subpacket);
+        show_Vectorxi(Y_vectors[nvec_indexs[i]], symbols_subpacket);
         std::cout << "\n----------------------------------------------------------------------------------------------------------------------------\n";
     }
 }

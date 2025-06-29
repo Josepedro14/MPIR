@@ -355,7 +355,7 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
         // Utilizamos as funções de adição de vetores e multiplicação de vetor por um escalar sobre Fq definidas no ficheiro (finite_field_operations.cpp)
         for (int k = 0; k < K-D; k++)
         {
-            Y1 = addVectorsFq(Y1, multVectorXVal(interference_messages[k], h_int(k))); 
+            Y1 = addVectorsFq(Y1, multVectorXValFq(interference_messages[k], h_int(k))); 
         }
 
         // Construir vetor de coeficientes de Y1 (vn1), no lugar dos subpacotes 1 das mensagens 3 e 4 irá colocar os respetivos coeficientes usados para calcular Y1, tendo como base esta distribuição de pacotes no vetor neste caso ( X1,1 , X1,2 , X2,1 , X2,2 , X3,1 , X3,2 , X4,1 , X4,2 ). 
@@ -396,7 +396,7 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
                     Eigen::VectorXi subpacketAux = demand_messages[i*L + l];
                     n_vectors[num_nvec][i * L + l] = gm(i);
    
-                    Yvec = addVectorsFq(Yvec,multVectorXVal(subpacketAux,gm(i)));                    
+                    Yvec = addVectorsFq(Yvec,multVectorXValFq(subpacketAux,gm(i)));                    
                 }
 
                 // Adicionamos-lhe o Y1 que corresponde às mensagens de interferência
@@ -422,22 +422,22 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
 
         // Criar uma permutação aleatória π: [N] -> [N]
         // Definir vetor de índices para baralhar de forma a manter a privacidade e esconder dos servidores as mensagens de interesse
-        std::vector <int> server_indexs (N);
+        std::vector <int> nvec_indexs (N);
         for(int k = 0; k < N; k++)
         {
-            server_indexs[k] = k;
+            nvec_indexs[k] = k;
         } 
 
         // Baralhar o vetor de índices para os servers
-        std::shuffle(server_indexs.begin(),server_indexs.end(),shuffle_random);
+        std::shuffle(nvec_indexs.begin(),nvec_indexs.end(),shuffle_random);
 
         std::cout << "\n-------------------------------------------------COMUNICATIONS WITH SERVERS-------------------------------------------------" << '\n';
 
-        std::cout << "\nPrint vetor server_indexs baralhado: ";
-        show_VectorSTD(server_indexs,N);
+        std::cout << "\nPrint vetor nvec_indexs baralhado: ";
+        show_VectorSTD(nvec_indexs,N);
         
         // Chamar função para simular conversas com os servers
-        show_QuerysAndAnswersServer(server_indexs, n_vectors, Y_vectors, N, L, K, symbols_subpacket);
+        show_QuerysAndAnswersServer(nvec_indexs, n_vectors, Y_vectors, N, L, K, symbols_subpacket);
 
         // Calculamos o valor das combinações lineares Yn com 2 <= n <= N, sem a interferência de Y1 em cada uma delas
         // Utilizamos a função de subtração de vetores sobre Fq definida no ficheiro (finite_field_operations.cpp)
@@ -469,16 +469,13 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
             }
         }
 
-    for (int i = 0; i < symbols_subpacket; i++) {
+        for (int i = 0; i < symbols_subpacket; i++) 
+        {
+            for (int j = 0; j < N - 1; j++) 
+            {
+                A(j, L * D) = Z_vectors[j](i);
+            }
 
-        for (int j = 0; j < N - 1; j++) {
-            
-            A(j, L * D) = Z_vectors[j](i);
-
+            calculateMatrixGauss(A, N - 1, L * D + 1, detA, true);   
         }
-
-        std::cout << "\nPrint matriz A: \n" << A << "\n";
-
-        calculateMatrixGauss(A, N - 1, L * D + 1, detA, true);   
-    }
 }   

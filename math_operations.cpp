@@ -46,6 +46,7 @@ void calculateMatrixGauss (Eigen::MatrixXi A, int rows, int cols, int &det, bool
                 if(A(j,i) != 0)
                 {
                     A.row(i).swap(A.row(j));
+                    det = mult_modFq(det,-1);
                     break;
                 }
 
@@ -90,22 +91,22 @@ void calculateMatrixGauss (Eigen::MatrixXi A, int rows, int cols, int &det, bool
     {
         std::vector<int> solutions(cols - 1, 0); 
 
-        for (int i = cols - 2; i >= 0; i--) 
+        for (int line = cols - 2; line >= 0; line--) 
         {
             int soma = 0;
 
-            for (int j = i + 1; j < cols - 1; j++)
+            for (int col = line + 1; col < cols - 1; col++)
             {
-                soma = add_modFq(soma, mult_modFq(A(i, j), solutions[j]));
+                soma = add_modFq(soma, mult_modFq(A(line, col), solutions[col]));
             }
 
-            int rhs = sub_modFq(A(i, cols - 1), soma); 
-            int pivot = A(i, i);
+            int pivot = A(line, line);
+            int valZn = sub_modFq(A(line, cols - 1), soma); 
 
             if (pivot != 0)
             {
                 int inv = inverso_modFq(pivot);
-                solutions[i] = mult_modFq(rhs, inv);
+                solutions[line] = mult_modFq(valZn, inv);
             }
  
         }

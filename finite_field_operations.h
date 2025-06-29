@@ -72,7 +72,7 @@ Eigen::VectorXi addVectorsFq (Eigen::VectorXi vec1, Eigen::VectorXi vec2);
 //   vec1 = (1, 2, 3, 4)
 //   val = 2
 //   Output = (2, 4, 1, 3)
-Eigen::VectorXi multVectorXVal (Eigen::VectorXi vec1, int val);
+Eigen::VectorXi multVectorXValFq (Eigen::VectorXi vec1, int val);
 
 
 // Subtração em Fq para vetores Eigen::VectorXi
