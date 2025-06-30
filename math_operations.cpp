@@ -96,6 +96,7 @@ void calculateMatrixGauss (Eigen::MatrixXi A, int rows, int cols, int &det, bool
             }
         }
 
+        std::cout << "\nGmatrix Escalonada " << '\n';
         std::cout << A << '\n';
     }
 

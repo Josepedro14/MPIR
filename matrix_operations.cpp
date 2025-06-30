@@ -17,7 +17,7 @@ Eigen::MatrixXd multiplyMatrixNTimes (Eigen::MatrixXd &matrix_M, int num_of_time
 }
 
 
-// Função que realiza uma rotação circular à direita nos elementos do vetor de tamanho D fornecido como parâmetro.
+// Função que realiza uma rotação circular à direita nas posições dos elementos não nulos do vetor de tamanho D fornecido como parâmetro.
 // Exemplo: Imaginemos que temos um valor 2 na última posição do vetor então no novo vetor este elemento 2 estará na primeira posição.
 Eigen::VectorXd buildCircularVector (Eigen::VectorXd &gDVec, int D)
 {

@@ -38,6 +38,7 @@ int mult_modFq (int a, int b)
     return conv<int>(res);
 }
 
+
 // Função que calcula o inverso de um dado número b
 // Retorna o resultado como um inteiro
 int inverso_modFq(int b)

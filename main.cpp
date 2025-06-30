@@ -11,7 +11,7 @@
 // 155 520
 int main ()
 {
-    int K = 4, N = 5, D = 2, m = 4;
+    int K = 4, N = 5, D = 2, m = 4;  
     int L = (N-1) / D, symbols_subpacket = m/L;
     // Não pode ser mais que 31 bits (valor máximo para o int), pois estou a converter de ZZ_p para int nos vetores Eigen::VectorXi então não posso gerar um número ZZ_p maior que o máximo de int
     int max_bits = 3;
@@ -32,7 +32,7 @@ int main ()
 
     std::cout << "\nPrint ordem do finite field: " << conv<int>(q) << '\n';
 
-    // Declarar e inicializar gerador aleatório
+    // Declarar e inicializar gerador pseudo-aleatório
     std::random_device rd;
     std::mt19937 shuffle_random(rd());
 
