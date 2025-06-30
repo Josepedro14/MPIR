@@ -35,6 +35,9 @@ int calculateCombinations (int D, int j);
 double calculateBJForM (int j, int D, int L);
 
 
+
+// Função que calcular a matriz escalonada da matriz A passada como parâmetro
+// Posteriormente resolve o sistema de equações lineares
 void calculateMatrixGauss (Eigen::MatrixXi A, int rows, int cols, int &det, bool sol);
 
 

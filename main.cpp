@@ -8,10 +8,10 @@
 //    q -> finite field de ordem q (q >= 3 e primo)
 //    m -> tamanho de cada mensagem ( m >= 2 e par)
 //    L -> Grau de Subpacketização (número de subpacotes)
-
+// 155 520
 int main ()
 {
-    int K = 4, N = 5, D = 2, m = 4; 
+    int K = 4, N = 5, D = 2, m = 4;
     int L = (N-1) / D, symbols_subpacket = m/L;
     // Não pode ser mais que 31 bits (valor máximo para o int), pois estou a converter de ZZ_p para int nos vetores Eigen::VectorXi então não posso gerar um número ZZ_p maior que o máximo de int
     int max_bits = 3;

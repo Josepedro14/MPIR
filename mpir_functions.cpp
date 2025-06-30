@@ -34,13 +34,13 @@ void buildShuffle_Subpackets(std::vector<Message> &messages, int K, int L, int s
 }
 
 
-// Função que calcula a matrix M, as funções f e g e uma matriz de probabilidades.
+// Função que calcula a matrix M, os vetores  f e g e uma matriz de probabilidades.
 // Retorna um par(i,j) obtido aleatoriamente através das probabilidades.
 std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int K, int D, int L, ZZ maxVal)
 {
-    // Define uma matriz identidade (D,D) para auxiliar no cálculo das funções f e g
+    // Define uma matriz identidade (D,D) para auxiliar no cálculo dos vetores f e g
     Eigen::MatrixXd identityMatrix = Eigen::MatrixXd::Identity(D,D);
-    // Definir um vetor de tamanho D quer irá ser preenchido por 1's e também será usado no cálculo das funções f e g
+    // Definir um vetor de tamanho D quer irá ser preenchido por 1's e também será usado no cálculo dos vetores f e g
     Eigen::VectorXd colVec1s(D);
 
     // Iterar sobre a matriz para a preencher
@@ -77,7 +77,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
     //std::cout << '\n';
     //show_Vector(colVec1s,D);
 
-    // Agora iremos calcular as funções fT e gT definidas no documento na página 2, elementos (2) e (3) respetivamente
+    // Agora iremos calcular os vetores fT e gT definidas no documento na página 2, elementos (2) e (3) respetivamente
     // M ^ (K-D)
     Eigen::MatrixXd matrixKminusD = multiplyMatrixNTimes(matrix_M ,(K-D), D);
     // fT = 1^T * M ^(K-D)
@@ -113,7 +113,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
 
     //std::cout << "\nPrint index j*: " << indexJ << " e o maxValfDIVg para esse j* é: " << maxValfDIVg << '\n';
 
-    // Para as probabilidades e possíveis pares (i,j) no exemplo ilustrativo temos -> (0,1);(0,2);(1,1);(1,2);(2,1);(2,2)
+    // Para as probabilidades e possíveis pares (i,j) no exemplo ilustrativo do documento temos -> (0,1);(0,2);(1,1);(1,2);(2,1);(2,2)
     Eigen::VectorXd probabilitiesPjD (D);
     // Definir matriz onde junto as probabilidades calculadas para depois sortear
     Eigen::MatrixXd matrixProb((K-D) + 1, D);
@@ -169,7 +169,7 @@ std::vector <int> build_MatrixM_fgAndChosePairij (Eigen::MatrixXd &matrix_M, int
 
      //std::cout << "\nSoma de todas as probabilidades da Matriz: " << matrixProb.sum() << '\n'; 
 
-    // Define vetor que conterá o par obtido pelas probabilidades e em que os seus 2 elementos estão dispostos pela ordem i,j
+    // Define vetor que vai conter o par obtido pelas probabilidades e em que os seus 2 elementos estão dispostos pela ordem i,j
     std::vector <int> pairValues;
     
     // Chamamos a função que vai calcular o par (i,j) 
@@ -274,7 +274,6 @@ void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int
         // Criar Gmatrix com valores inteiros para calcular o determinante
         Eigen::MatrixXi Gmatrix_i = Gmatrix.cast<int>();
 
-        // Chamada de função para calcular o determinante da matriz de forma recursiva segundo o teorema de Laplace
         int det = 1;
         calculateMatrixGauss(Gmatrix_i,D,D,det,false);
 
@@ -293,7 +292,7 @@ void buildSparseVectorHAndG (std::vector <int> &pairIJ, int D, int K, int L, int
 }
 
 // Função para construir N vetores de tamanho K * L.
-// Estes vetores são gerados um algoritmo random, baseado no conjunto de mensagens de interesse (W), as regras são as seguintes:
+// Estes vetores são gerados por um algoritmo random, baseado no conjunto de mensagens de interesse (W), as regras são as seguintes:
 //      - Se i = 0 (i -> valor do parij calculado anteriormente) então v1 é um vetor de zeros, caso contrário v1 é o vetor coeficiente 
 //        correspondente a combinação linear Y1 definida como Y1 = h * [Xu1,1,...,XuK-D,1] ^T onde h é o sparse vector calculado anteriormente e u1,...,uK-D 
 //        são os índices das K-D mensagens de interferência numa ordem crescente ou decrescente mas fixa.
@@ -456,11 +455,12 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
             show_Vectorxi(Z_vectors[j], symbols_subpacket);
         }
 
-
+        // Variável que vai conter a matriz aumentada, para o sistema de equações lineares
         Eigen::MatrixXi A (N-1, L * D + 1);
-        Eigen::VectorXi vecAux (N * symbols_subpacket);
         int detA;
 
+        // Queremos D mensagens cada mensagem tem L subpacotes então temos D*L colunas
+        // Preencher as primeiras L*D colunas da matriz com os valores dos coeficientes dos supacotes desejados
         for(int i = 0; i < N-1; i++)
         {
             for(int j = 0; j < L * D; j++)
@@ -469,13 +469,17 @@ void constructNVectors (int D, int K, int i_index, int L, int N, int symbols_sub
             }
         }
 
+        // Iterar pelo número de elementos de um subpacote
         for (int i = 0; i < symbols_subpacket; i++) 
-        {
+        {   
+            // A última coluna da matriz contém os elementos na posição i do vetor Z_n atual
+            // Dado Z1 = (1,2), se i = 0, j = 0 então a última coluna da matriz tem o elemento 1 na primeira linha  
             for (int j = 0; j < N - 1; j++) 
             {
                 A(j, L * D) = Z_vectors[j](i);
             }
 
+            // Função que calcula as soluções do sistema de equações através do método de gauss
             calculateMatrixGauss(A, N - 1, L * D + 1, detA, true);   
         }
 }   
